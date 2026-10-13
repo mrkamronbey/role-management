@@ -1,6 +1,6 @@
-import { http } from '@/shared/api'
-import type { Report } from '../model/types'
+import { ENDPOINTS, http, type Paginated } from '@/shared/api'
+import type { Report, ReportsParams } from '../model/types'
 
 export const reportApi = {
-  getList: () => http.get<Report[]>('/reports'),
+  getList: (params: ReportsParams) => http.get<Paginated<Report>>(ENDPOINTS.reports, { params }),
 }

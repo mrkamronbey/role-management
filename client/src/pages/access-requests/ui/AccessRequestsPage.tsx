@@ -1,19 +1,28 @@
 import { useState } from 'react'
 import { Button, Result, Segmented, Skeleton, Typography } from 'antd'
-import { useAccessRequestsQuery } from '@/entities/access-request'
+import { useAccessRequestsQuery, usePendingRequestsQuery } from '@/entities/access-request'
 import { getErrorMessage } from '@/shared/api'
-import { EmptyState, PageLayout } from '@/shared/ui'
+import { EmptyState, PageLayout, PaginationFooter } from '@/shared/ui'
 import { AccessRequestCard } from './AccessRequestCard'
 
 type Tab = 'pending' | 'reviewed'
 
+const PAGE_SIZE = 10
+
 export const AccessRequestsPage = () => {
   const [tab, setTab] = useState<Tab>('pending')
-  const { data = [], isPending, isError, error, refetch } = useAccessRequestsQuery()
+  const [page, setPage] = useState(1)
+  const pendingQuery = usePendingRequestsQuery()
+  const { data, isPending, isError, error, refetch } = useAccessRequestsQuery({
+    status: tab,
+    page,
+    limit: PAGE_SIZE,
+  })
 
-  const pending = data.filter((request) => request.status === 'PENDING')
-  const reviewed = data.filter((request) => request.status !== 'PENDING')
-  const requests = tab === 'pending' ? pending : reviewed
+  const handleTabChange = (value: Tab) => {
+    setTab(value)
+    setPage(1)
+  }
 
   let content
   if (isPending) {
@@ -27,7 +36,7 @@ export const AccessRequestsPage = () => {
         extra={<Button onClick={() => refetch()}>Qayta urinish</Button>}
       />
     )
-  } else if (requests.length === 0) {
+  } else if (data.items.length === 0) {
     content = (
       <EmptyState
         description={tab === 'pending' ? "Yangi so'rovlar yo'q" : "Ko'rib chiqilgan so'rovlar yo'q"}
@@ -36,12 +45,22 @@ export const AccessRequestsPage = () => {
   } else {
     content = (
       <div className="flex flex-col gap-3">
-        {requests.map((request) => (
+        {data.items.map((request) => (
           <AccessRequestCard key={request.id} request={request} />
         ))}
       </div>
     )
   }
+
+  const footer = data && data.total > 0 && (
+    <PaginationFooter
+      total={data.total}
+      page={page}
+      pageSize={PAGE_SIZE}
+      label="so'rov"
+      onChange={setPage}
+    />
+  )
 
   return (
     <PageLayout
@@ -53,14 +72,15 @@ export const AccessRequestsPage = () => {
           </Typography.Text>
           <Segmented<Tab>
             value={tab}
-            onChange={setTab}
+            onChange={handleTabChange}
             options={[
-              { value: 'pending', label: `Kutilmoqda · ${pending.length}` },
-              { value: 'reviewed', label: `Ko'rib chiqilgan · ${reviewed.length}` },
+              { value: 'pending', label: `Kutilmoqda · ${pendingQuery.data?.total ?? 0}` },
+              { value: 'reviewed', label: "Ko'rib chiqilgan" },
             ]}
           />
         </div>
       }
+      footer={footer}
     >
       {content}
     </PageLayout>

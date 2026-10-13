@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Pagination, Result, Skeleton, Typography } from 'antd'
+import { Button, Result, Skeleton } from 'antd'
 import { useUsersQuery } from '@/entities/user'
 import { getErrorMessage } from '@/shared/api'
 import { useIsMobile } from '@/shared/lib/hooks'
@@ -8,7 +8,7 @@ import { UserInspector } from './UserInspector'
 import { UsersCardList } from './UsersCardList'
 import { usersColumns } from './usersColumns'
 import { UsersToolbar } from './UsersToolbar'
-import { DataTable, PageLayout } from '@/shared/ui'
+import { DataTable, PageLayout, PaginationFooter } from '@/shared/ui'
 
 export const UsersPage = () => {
   const isMobile = useIsMobile()
@@ -57,19 +57,13 @@ export const UsersPage = () => {
   }
 
   const footer = data && data.total > 0 && (
-    <div className="flex items-center justify-between gap-3">
-      <Typography.Text type="secondary" className="hidden sm:inline">
-        Jami: {data.total} ta foydalanuvchi
-      </Typography.Text>
-      <Pagination
-        size="small"
-        current={page}
-        pageSize={USERS_PAGE_SIZE}
-        total={data.total}
-        showSizeChanger={false}
-        onChange={setPage}
-      />
-    </div>
+    <PaginationFooter
+      total={data.total}
+      page={page}
+      pageSize={USERS_PAGE_SIZE}
+      label="foydalanuvchi"
+      onChange={setPage}
+    />
   )
 
   return (

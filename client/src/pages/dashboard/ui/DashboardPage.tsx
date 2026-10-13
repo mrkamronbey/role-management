@@ -1,7 +1,7 @@
 import { AuditOutlined, FileDoneOutlined, TeamOutlined, WalletOutlined } from '@ant-design/icons'
 import { Col, Row, Typography, theme } from 'antd'
-import { useAccessRequestsQuery } from '@/entities/access-request'
-import { PaymentStatusTag, usePaymentsQuery } from '@/entities/payment'
+import { usePendingRequestsQuery } from '@/entities/access-request'
+import { PaymentStatusTag, usePaymentsQuery, usePaymentsSummaryQuery } from '@/entities/payment'
 import { useReportsQuery } from '@/entities/report'
 import { RoleTag } from '@/entities/role'
 import { hasAnyRole, useCurrentUser, useUserRoles } from '@/entities/session'
@@ -24,18 +24,13 @@ export const DashboardPage = () => {
   const canSeeReports = hasAnyRole(roles, PAGE_ROLES.reports)
 
   const usersQuery = useUsersQuery({ page: 1, limit: 1 }, canSeeUsers)
-  const requestsQuery = useAccessRequestsQuery(canSeeRequests)
-  const paymentsQuery = usePaymentsQuery({}, canSeePayments)
-  const reportsQuery = useReportsQuery(canSeeReports)
+  const requestsQuery = usePendingRequestsQuery(canSeeRequests)
+  const paymentsQuery = usePaymentsQuery({ page: 1, limit: 5 }, canSeePayments)
+  const summaryQuery = usePaymentsSummaryQuery({}, canSeePayments)
+  const readyReportsQuery = useReportsQuery({ status: 'READY', page: 1, limit: 1 }, canSeeReports)
 
-  const pendingRequests = (requestsQuery.data ?? []).filter(
-    (request) => request.status === 'PENDING',
-  )
-  const payments = paymentsQuery.data ?? []
-  const successAmount = payments
-    .filter((payment) => payment.status === 'SUCCESS')
-    .reduce((sum, payment) => sum + payment.amount, 0)
-  const readyReports = (reportsQuery.data ?? []).filter((report) => report.status === 'READY')
+  const pendingRequests = requestsQuery.data?.items ?? []
+  const payments = paymentsQuery.data?.items ?? []
 
   const stats = [
     {
@@ -49,7 +44,7 @@ export const DashboardPage = () => {
     {
       visible: canSeeRequests,
       title: "Kutilayotgan so'rovlar",
-      value: requestsQuery.data ? pendingRequests.length : '—',
+      value: requestsQuery.data?.total ?? '—',
       icon: <AuditOutlined />,
       color: token.colorWarning,
       path: ROUTES.accessRequests,
@@ -57,7 +52,7 @@ export const DashboardPage = () => {
     {
       visible: canSeePayments,
       title: "Muvaffaqiyatli to'lovlar",
-      value: paymentsQuery.data ? formatMoney(successAmount) : '—',
+      value: summaryQuery.data ? formatMoney(summaryQuery.data.totalAmount) : '—',
       icon: <WalletOutlined />,
       color: BRAND_COLORS.gold,
       path: ROUTES.payments,
@@ -65,7 +60,7 @@ export const DashboardPage = () => {
     {
       visible: canSeeReports,
       title: 'Tayyor hisobotlar',
-      value: reportsQuery.data ? readyReports.length : '—',
+      value: readyReportsQuery.data?.total ?? '—',
       icon: <FileDoneOutlined />,
       color: token.colorSuccess,
       path: ROUTES.reports,
@@ -123,7 +118,7 @@ export const DashboardPage = () => {
               emptyText="To'lovlar yo'q"
               isEmpty={payments.length === 0}
             >
-              {payments.slice(0, 5).map((payment) => (
+              {payments.map((payment) => (
                 <RecentListItem
                   key={payment.id}
                   title={payment.payer}

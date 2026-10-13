@@ -1,4 +1,4 @@
-import { http } from '@/shared/api'
+import { ENDPOINTS, http } from '@/shared/api'
 import type { SessionUser } from '../model/session.store'
 
 export interface LoginPayload {
@@ -12,6 +12,6 @@ interface LoginResponse {
 }
 
 export const sessionApi = {
-  login: (payload: LoginPayload) => http.post<LoginResponse>('/auth/login', payload),
-  getMe: () => http.get<SessionUser>('/auth/me'),
+  login: (payload: LoginPayload) => http.post<LoginResponse>(ENDPOINTS.auth.login, payload),
+  getMe: () => http.get<SessionUser>(ENDPOINTS.auth.me),
 }

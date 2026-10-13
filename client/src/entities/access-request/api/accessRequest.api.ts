@@ -1,9 +1,11 @@
-import { http } from '@/shared/api'
-import type { AccessRequest, CreateAccessRequestDto } from '../model/types'
+import { ENDPOINTS, http, type Paginated } from '@/shared/api'
+import type { AccessRequest, AccessRequestsParams, CreateAccessRequestDto } from '../model/types'
 
 export const accessRequestApi = {
-  getList: () => http.get<AccessRequest[]>('/access-requests'),
-  create: (dto: CreateAccessRequestDto) => http.post<AccessRequest>('/access-requests', dto),
-  approve: (id: number) => http.patch<AccessRequest>(`/access-requests/${id}/approve`),
-  reject: (id: number) => http.patch<AccessRequest>(`/access-requests/${id}/reject`),
+  getList: (params: AccessRequestsParams) =>
+    http.get<Paginated<AccessRequest>>(ENDPOINTS.accessRequests.list, { params }),
+  create: (dto: CreateAccessRequestDto) =>
+    http.post<AccessRequest>(ENDPOINTS.accessRequests.list, dto),
+  approve: (id: number) => http.patch<AccessRequest>(ENDPOINTS.accessRequests.approve(id)),
+  reject: (id: number) => http.patch<AccessRequest>(ENDPOINTS.accessRequests.reject(id)),
 }

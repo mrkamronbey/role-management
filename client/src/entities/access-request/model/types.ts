@@ -1,3 +1,4 @@
+import type { PaginationParams } from '@/shared/api'
 import type { RoleName } from '@/shared/config'
 
 export type AccessRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED'
@@ -20,4 +21,8 @@ export interface AccessRequest {
 export interface CreateAccessRequestDto {
   role: RoleName
   reason: string
+}
+
+export interface AccessRequestsParams extends PaginationParams {
+  status?: 'pending' | 'reviewed'
 }

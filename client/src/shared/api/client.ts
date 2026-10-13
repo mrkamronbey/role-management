@@ -1,6 +1,7 @@
 import axios, { type AxiosRequestConfig } from 'axios'
 import { env } from '../config'
 import { apiConfig } from './configure'
+import { ENDPOINTS } from './endpoints'
 import type { ApiResponse } from './types'
 
 const apiClient = axios.create({
@@ -18,7 +19,7 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && error.config?.url !== '/auth/login') {
+    if (error.response?.status === 401 && error.config?.url !== ENDPOINTS.auth.login) {
       apiConfig.onUnauthorized()
     }
     return Promise.reject(error)

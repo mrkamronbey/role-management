@@ -1,0 +1,1 @@
+export { PaginationFooter } from './PaginationFooter'

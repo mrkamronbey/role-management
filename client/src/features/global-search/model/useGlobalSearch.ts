@@ -35,8 +35,14 @@ export const useGlobalSearch = (query: string) => {
     { search: text, page: 1, limit: MAX_RESULTS },
     hasQuery && canSeeUsers,
   )
-  const paymentsQuery = usePaymentsQuery({}, hasQuery && canSeePayments)
-  const reportsQuery = useReportsQuery(hasQuery && canSeeReports)
+  const paymentsQuery = usePaymentsQuery(
+    { search: text, page: 1, limit: MAX_RESULTS },
+    hasQuery && canSeePayments,
+  )
+  const reportsQuery = useReportsQuery(
+    { search: text, page: 1, limit: MAX_RESULTS },
+    hasQuery && canSeeReports,
+  )
 
   const pages = NAV_ITEMS.filter(
     (item) => hasAnyRole(roles, item.roles) && item.label.toLowerCase().includes(text),
@@ -54,27 +60,19 @@ export const useGlobalSearch = (query: string) => {
     path: getUserEditPath(user.id),
   }))
 
-  const payments = (paymentsQuery.data ?? [])
-    .filter(
-      (payment) => payment.payer.toLowerCase().includes(text) || String(payment.id).includes(text),
-    )
-    .slice(0, MAX_RESULTS)
-    .map((payment) => ({
-      key: `payment-${payment.id}`,
-      title: `№${payment.id} · ${payment.payer}`,
-      description: formatMoney(payment.amount),
-      path: ROUTES.payments,
-    }))
+  const payments = (paymentsQuery.data?.items ?? []).map((payment) => ({
+    key: `payment-${payment.id}`,
+    title: `${payment.receiptNumber} · ${payment.payer}`,
+    description: formatMoney(payment.amount),
+    path: ROUTES.payments,
+  }))
 
-  const reports = (reportsQuery.data ?? [])
-    .filter((report) => report.title.toLowerCase().includes(text))
-    .slice(0, MAX_RESULTS)
-    .map((report) => ({
-      key: `report-${report.id}`,
-      title: report.title,
-      description: report.period,
-      path: ROUTES.reports,
-    }))
+  const reports = (reportsQuery.data?.items ?? []).map((report) => ({
+    key: `report-${report.id}`,
+    title: report.title,
+    description: report.period,
+    path: ROUTES.reports,
+  }))
 
   const groups: SearchGroup[] = [
     { type: 'pages', title: 'Sahifalar', items: pages },

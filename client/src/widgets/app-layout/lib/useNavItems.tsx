@@ -1,13 +1,13 @@
 import { Badge, type MenuProps } from 'antd'
-import { useAccessRequestsQuery } from '@/entities/access-request'
+import { usePendingRequestsQuery } from '@/entities/access-request'
 import { hasAnyRole, useUserRoles } from '@/entities/session'
 import { NAV_GROUPS, NAV_ITEMS, PAGE_ROLES, ROUTES } from '@/shared/config'
 
 export const useNavItems = (collapsed: boolean): MenuProps['items'] => {
   const roles = useUserRoles()
   const canSeeRequests = hasAnyRole(roles, PAGE_ROLES.accessRequests)
-  const { data: requests = [] } = useAccessRequestsQuery(canSeeRequests)
-  const pendingCount = requests.filter((request) => request.status === 'PENDING').length
+  const pendingQuery = usePendingRequestsQuery(canSeeRequests)
+  const pendingCount = pendingQuery.data?.total ?? 0
 
   return NAV_GROUPS.map((group) => ({
     key: group.key,

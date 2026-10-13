@@ -1,4 +1,5 @@
 export { http } from './client'
 export { configureApi } from './configure'
+export { ENDPOINTS } from './endpoints'
 export { getErrorMessage, getFieldErrors } from './getErrorMessage'
-export type { Paginated } from './types'
+export type { Paginated, PaginationParams } from './types'

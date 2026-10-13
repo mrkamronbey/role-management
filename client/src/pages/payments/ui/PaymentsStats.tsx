@@ -5,47 +5,40 @@ import {
   WalletOutlined,
 } from '@ant-design/icons'
 import { Typography, theme } from 'antd'
-import type { Payment, PaymentStatus } from '@/entities/payment'
+import type { PaymentsSummary } from '@/entities/payment'
 import { BRAND_COLORS } from '@/shared/config'
 import { formatMoney } from '@/shared/lib/format'
 
 interface PaymentsStatsProps {
-  payments: Payment[]
+  summary?: PaymentsSummary
   loading: boolean
 }
 
-export const PaymentsStats = ({ payments, loading }: PaymentsStatsProps) => {
+export const PaymentsStats = ({ summary, loading }: PaymentsStatsProps) => {
   const { token } = theme.useToken()
-
-  const countByStatus = (status: PaymentStatus) =>
-    payments.filter((payment) => payment.status === status).length
-
-  const totalAmount = payments
-    .filter((payment) => payment.status === 'SUCCESS')
-    .reduce((sum, payment) => sum + payment.amount, 0)
 
   const stats = [
     {
       title: 'Jami summa',
-      value: formatMoney(totalAmount),
+      value: formatMoney(summary?.totalAmount ?? 0),
       icon: <WalletOutlined />,
       color: BRAND_COLORS.gold,
     },
     {
       title: 'Muvaffaqiyatli',
-      value: countByStatus('SUCCESS'),
+      value: summary?.success ?? 0,
       icon: <CheckCircleOutlined />,
       color: token.colorSuccess,
     },
     {
       title: 'Kutilmoqda',
-      value: countByStatus('PENDING'),
+      value: summary?.pending ?? 0,
       icon: <ClockCircleOutlined />,
       color: token.colorWarning,
     },
     {
       title: 'Rad etilgan',
-      value: countByStatus('FAILED'),
+      value: summary?.failed ?? 0,
       icon: <CloseCircleOutlined />,
       color: token.colorError,
     },

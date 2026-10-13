@@ -1,7 +1,7 @@
 export interface ApiResponse<T> {
   success: boolean
   data: T
-  message?: string
+  message: string
 }
 
 export interface FieldError {
@@ -19,6 +19,11 @@ export interface ApiErrorBody {
 export interface Paginated<T> {
   items: T[]
   total: number
+  page: number
+  limit: number
+}
+
+export interface PaginationParams {
   page: number
   limit: number
 }
