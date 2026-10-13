@@ -54,7 +54,7 @@ export const DashboardPage = () => {
       title: "Muvaffaqiyatli to'lovlar",
       value: summaryQuery.data ? formatMoney(summaryQuery.data.totalAmount) : '—',
       icon: <WalletOutlined />,
-      color: BRAND_COLORS.gold,
+      color: BRAND_COLORS.primary,
       path: ROUTES.payments,
     },
     {

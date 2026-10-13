@@ -17,7 +17,7 @@ export const LoginPage = () => (
       style={{ backgroundColor: BRAND_COLORS.dark }}
     >
       <div className="flex items-center gap-3">
-        <SafetyCertificateFilled className="text-3xl" style={{ color: BRAND_COLORS.gold }} />
+        <SafetyCertificateFilled className="text-3xl" style={{ color: BRAND_COLORS.primary }} />
         <span className="text-lg font-semibold text-white">Boshqaruv tizimi</span>
       </div>
 
@@ -31,7 +31,7 @@ export const LoginPage = () => (
         <ul className="flex flex-col gap-3">
           {features.map((feature) => (
             <li key={feature} className="flex items-center gap-3 text-white/80">
-              <CheckCircleFilled style={{ color: BRAND_COLORS.gold }} />
+              <CheckCircleFilled style={{ color: BRAND_COLORS.primary }} />
               {feature}
             </li>
           ))}
@@ -47,7 +47,7 @@ export const LoginPage = () => (
       <div className="w-full max-w-sm">
         <SafetyCertificateFilled
           className="mb-6 text-4xl lg:hidden"
-          style={{ color: BRAND_COLORS.gold }}
+          style={{ color: BRAND_COLORS.primary }}
         />
         <Typography.Title level={2} className="mb-2">
           Xush kelibsiz

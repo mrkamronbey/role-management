@@ -22,7 +22,7 @@ export const PaymentsStats = ({ summary, loading }: PaymentsStatsProps) => {
       title: 'Jami summa',
       value: formatMoney(summary?.totalAmount ?? 0),
       icon: <WalletOutlined />,
-      color: BRAND_COLORS.gold,
+      color: BRAND_COLORS.primary,
     },
     {
       title: 'Muvaffaqiyatli',

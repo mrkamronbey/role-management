@@ -13,7 +13,7 @@ export const UserAvatar = ({ user, size = 'default', shape = 'circle' }: UserAva
   <Avatar
     size={size}
     shape={shape}
-    style={{ backgroundColor: BRAND_COLORS.gold, color: BRAND_COLORS.dark, flexShrink: 0 }}
+    style={{ backgroundColor: BRAND_COLORS.primary, color: '#FFFFFF', flexShrink: 0 }}
   >
     {getInitials(user)}
   </Avatar>
