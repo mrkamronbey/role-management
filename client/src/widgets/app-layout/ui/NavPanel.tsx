@@ -1,7 +1,6 @@
 import { theme } from 'antd'
 import { AppLogo } from './AppLogo'
 import { NavMenu } from './NavMenu'
-import { UserMenu } from './UserMenu'
 
 interface NavPanelProps {
   collapsed?: boolean
@@ -19,9 +18,6 @@ export const NavPanel = ({ collapsed = false, onNavigate }: NavPanelProps) => {
       </div>
       <div className="flex-1 overflow-y-auto py-2">
         <NavMenu collapsed={collapsed} onNavigate={onNavigate} />
-      </div>
-      <div className="flex h-16 shrink-0 items-center px-3" style={{ borderTop: border }}>
-        <UserMenu collapsed={collapsed} />
       </div>
     </div>
   )

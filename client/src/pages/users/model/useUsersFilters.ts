@@ -1,37 +1,35 @@
-import { useSearchParams } from 'react-router'
-import type { RoleName } from '@/shared/config'
+import { ROLES } from '@/shared/config'
+import { useUrlParams } from '@/shared/lib/hooks'
 
-export const USERS_PAGE_SIZE = 10
+const ROLE_OPTIONS = Object.values(ROLES)
 
 export const useUsersFilters = () => {
-  const [searchParams, setSearchParams] = useSearchParams()
-
-  const search = searchParams.get('search') ?? ''
-  const role = (searchParams.get('role') as RoleName | null) ?? undefined
-  const page = Number(searchParams.get('page')) || 1
-
-  const setParam = (key: string, value?: string) => {
-    const params = new URLSearchParams(searchParams)
-
-    if (value) {
-      params.set(key, value)
-    } else {
-      params.delete(key)
-    }
-
-    if (key !== 'page') {
-      params.delete('page')
-    }
-
-    setSearchParams(params)
-  }
+  const {
+    page,
+    limit,
+    pageSizes,
+    from,
+    to,
+    getParam,
+    getOption,
+    setParams,
+    setPeriod,
+    setPage,
+    setLimit,
+  } = useUrlParams()
 
   return {
-    search,
-    role,
+    search: getParam('search') ?? '',
+    role: getOption('role', ROLE_OPTIONS),
+    from,
+    to,
     page,
-    setSearch: (value: string) => setParam('search', value),
-    setRole: (value?: RoleName) => setParam('role', value),
-    setPage: (value: number) => setParam('page', String(value)),
+    limit,
+    pageSizes,
+    setSearch: (search: string) => setParams({ search }),
+    setRole: (role?: string) => setParams({ role }),
+    setPeriod,
+    setPage,
+    setLimit,
   }
 }

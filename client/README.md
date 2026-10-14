@@ -45,15 +45,16 @@ Ilova `http://localhost:8080` da ochiladi. `nginx.conf` SPA route'larini `index.
 | Route | Kim uchun |
 |---|---|
 | `/login` | Login qilmagan foydalanuvchi |
-| `/dashboard` | Rolga ega har bir foydalanuvchi (bosh sahifa) |
-| `/users`, `/users/new`, `/users/:id/edit` | `ADMIN` |
+| `/dashboard` | `ADMIN` (bosh sahifa). Boshqa rollar login'dan keyin o'z bo'limiga (To'lovlar / Hisobotlar) tushadi |
+| `/users` (qo'shish va tahrirlash modal oynada) | `ADMIN` |
 | `/access-requests` | `ADMIN` (kirish so'rovlarini tasdiqlash / rad etish) |
 | `/payments` | `PAYMENT` (yoki `ADMIN`) |
 | `/reports` | `REPORTS` (yoki `ADMIN`) |
+| `/profile` | Har bir login qilgan foydalanuvchi: shaxsiy ma'lumotlar va ochiq bo'limlar |
 | `/403` | Ruxsat yo'q |
 | `/no-roles` | Hech qanday roli yo'q foydalanuvchi ("Kirish so'rash" tugmasi bilan) |
 
-Bir nechta roli bor foydalanuvchi barcha mos sahifalarni ko'radi. Login'dan keyin birinchi ruxsat etilgan sahifa ochiladi.
+Bir nechta roli bor foydalanuvchi kerakli sahifalarni ko'radi. Login'dan keyin birinchi ruxsati bor sahifa ochiladi.
 
 ## Tuzilma (Feature-Sliced Design)
 
@@ -77,3 +78,7 @@ Import faqat yuqoridan pastga yo'naladi: `app → pages → widgets → features
 - **ADMIN** superuser: barcha sahifalarni qo'shimcha rolsiz ko'radi.
 - **Sessiya:** `localStorage` da faqat token saqlanadi. Sahifa yangilanganda foydalanuvchi va rollar `/auth/me` dan qayta olinadi. 401 javobida sessiya tozalanadi.
 - **Frontend'dagi himoya** (`PrivateRoutes`, `PrivateComponent`) faqat interfeys uchun. Haqiqiy tekshiruv backend'dagi Guard'larda.
+
+## Rasmlar
+
+Login sahifasidagi fon rasmi (`src/shared/assets/login-bg.jpg`): Toshkent, Nest One. Muallif: [Iskandar Kambaraliyev](https://unsplash.com/@takhirjanovich), [Unsplash](https://unsplash.com/photos/U6UuPXyyINo) (Unsplash License, bepul foydalanish mumkin).

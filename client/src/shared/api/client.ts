@@ -39,6 +39,10 @@ export const http = {
     const response = await apiClient.patch<ApiResponse<T>>(url, body)
     return response.data.data
   },
+  download: async (url: string, params?: object) => {
+    const response = await apiClient.get<Blob>(url, { params, responseType: 'blob' })
+    return response.data
+  },
   delete: async <T>(url: string) => {
     const response = await apiClient.delete<ApiResponse<T>>(url)
     return response.data.data

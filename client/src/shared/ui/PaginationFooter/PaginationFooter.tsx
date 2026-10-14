@@ -1,31 +1,44 @@
-import { Pagination, Typography } from 'antd'
+import { Pagination } from 'antd'
+import { useIsMobile } from '../../lib/hooks'
 
 interface PaginationFooterProps {
   total: number
   page: number
   pageSize: number
+  pageSizeOptions: number[]
   label: string
   onChange: (page: number) => void
+  onPageSizeChange: (pageSize: number) => void
 }
 
 export const PaginationFooter = ({
   total,
   page,
   pageSize,
+  pageSizeOptions,
   label,
   onChange,
-}: PaginationFooterProps) => (
-  <div className="flex items-center justify-between gap-3">
-    <Typography.Text type="secondary" className="hidden sm:inline">
-      Jami: {total} ta {label}
-    </Typography.Text>
+  onPageSizeChange,
+}: PaginationFooterProps) => {
+  const isMobile = useIsMobile()
+
+  return (
     <Pagination
-      size="small"
+      simple={isMobile}
       current={page}
       pageSize={pageSize}
       total={total}
-      showSizeChanger={false}
-      onChange={onChange}
+      showSizeChanger={!isMobile}
+      pageSizeOptions={pageSizeOptions}
+      showTotal={(count, [start, end]) =>
+        isMobile
+          ? `${start}–${end} / ${count} ta`
+          : `Ko'rsatilmoqda ${start} – ${end} / ${count} ta ${label}`
+      }
+      onChange={(nextPage, nextPageSize) =>
+        nextPageSize === pageSize ? onChange(nextPage) : onPageSizeChange(nextPageSize)
+      }
+      className="[&_.ant-pagination-total-text]:me-auto"
     />
-  </div>
-)
+  )
+}

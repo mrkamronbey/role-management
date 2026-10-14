@@ -1,22 +1,32 @@
 import { useState } from 'react'
-import { Button, DatePicker, Result, Select } from 'antd'
-import type { Dayjs } from 'dayjs'
+import { Button, Result, Select } from 'antd'
 import {
   PAYMENT_STATUS_META,
   usePaymentsQuery,
   usePaymentsSummaryQuery,
   type PaymentStatus,
 } from '@/entities/payment'
+import { ExportPaymentsButton } from '@/features/payments-export'
 import { getErrorMessage } from '@/shared/api'
-import { DataTable, PageLayout, PaginationFooter } from '@/shared/ui'
+import { useIsMobile, useLocalStorage } from '@/shared/lib/hooks'
+import {
+  ColumnSelector,
+  DataTable,
+  DateRangeFilter,
+  PageCard,
+  PaginationFooter,
+  RefreshButton,
+} from '@/shared/ui'
+import { usePaymentsFilters } from '../model/usePaymentsFilters'
 import { PaymentInspector } from './PaymentInspector'
+import { PaymentsCardList } from './PaymentsCardList'
 import { PaymentsStats } from './PaymentsStats'
-import { paymentsColumns } from './paymentsColumns'
-
-type DateRange = [Dayjs | null, Dayjs | null] | null
-
-const DATE_FORMAT = 'YYYY-MM-DD'
-const PAGE_SIZE = 10
+import {
+  DEFAULT_PAYMENT_COLUMNS,
+  PAYMENT_COLUMN_TITLES,
+  getReceiptColumn,
+  paymentsColumns,
+} from './paymentsColumns'
 
 const statusOptions = Object.entries(PAYMENT_STATUS_META).map(([value, meta]) => ({
   value,
@@ -24,70 +34,72 @@ const statusOptions = Object.entries(PAYMENT_STATUS_META).map(([value, meta]) =>
 }))
 
 export const PaymentsPage = () => {
-  const [range, setRange] = useState<DateRange>(null)
-  const [status, setStatus] = useState<PaymentStatus>()
-  const [page, setPage] = useState(1)
+  const { from, to, status, page, limit, pageSizes, setPeriod, setStatus, setPage, setLimit } =
+    usePaymentsFilters()
   const [selectedId, setSelectedId] = useState<number | null>(null)
+  const isMobile = useIsMobile()
+  const [columnSettings, setColumnSettings] = useLocalStorage(
+    'payments-table-columns',
+    DEFAULT_PAYMENT_COLUMNS,
+  )
 
-  const period = {
-    from: range?.[0]?.format(DATE_FORMAT),
-    to: range?.[1]?.format(DATE_FORMAT),
+  const columns = columnSettings.flatMap((setting) => {
+    const column = paymentsColumns.find((item) => item.key === setting.key)
+    return setting.visible && column ? [column] : []
+  })
+  const tableColumns = [...columns, getReceiptColumn((payment) => setSelectedId(payment.id))]
+
+  const summaryQuery = usePaymentsSummaryQuery({ from, to })
+  const paymentsQuery = usePaymentsQuery({ from, to, status, page, limit })
+
+  const handleRefresh = () => {
+    paymentsQuery.refetch()
+    summaryQuery.refetch()
   }
-  const summaryQuery = usePaymentsSummaryQuery(period)
-  const paymentsQuery = usePaymentsQuery({ ...period, status, page, limit: PAGE_SIZE })
 
   const payments = paymentsQuery.data?.items ?? []
   const selectedPayment = payments.find((payment) => payment.id === selectedId)
 
-  const handleRangeChange = (value: DateRange) => {
-    setRange(value)
-    setPage(1)
-  }
-
-  const handleStatusChange = (value?: PaymentStatus) => {
-    setStatus(value)
-    setPage(1)
-  }
-
-  const footer = paymentsQuery.data && paymentsQuery.data.total > 0 && (
-    <PaginationFooter
-      total={paymentsQuery.data.total}
-      page={page}
-      pageSize={PAGE_SIZE}
-      label="to'lov"
-      onChange={setPage}
-    />
-  )
-
   return (
-    <PageLayout
-      header={
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <PaymentsStats summary={summaryQuery.data} loading={summaryQuery.isPending} />
-          <div className="flex flex-wrap gap-3">
-            <Select
-              allowClear
-              placeholder="Holat"
-              options={statusOptions}
-              value={status}
-              onChange={handleStatusChange}
-              className="w-40"
+    <PageCard
+      extra={
+        <>
+          <Select
+            allowClear
+            placeholder="Holat"
+            options={statusOptions}
+            value={status}
+            onChange={(value?: PaymentStatus) => setStatus(value)}
+            className="w-40"
+          />
+          <DateRangeFilter from={from} to={to} onChange={setPeriod} />
+          {!isMobile && (
+            <ColumnSelector
+              titles={PAYMENT_COLUMN_TITLES}
+              value={columnSettings}
+              defaultValue={DEFAULT_PAYMENT_COLUMNS}
+              onChange={setColumnSettings}
             />
-            <DatePicker.RangePicker
-              value={range}
-              onChange={handleRangeChange}
-              format="DD.MM.YYYY"
-            />
-          </div>
-        </div>
+          )}
+          <ExportPaymentsButton filters={{ from, to, status }} />
+          <RefreshButton loading={paymentsQuery.isFetching} onClick={handleRefresh} />
+        </>
       }
-      footer={footer}
-      inspector={
-        selectedPayment && (
-          <PaymentInspector payment={selectedPayment} onClose={() => setSelectedId(null)} />
+      filters={<PaymentsStats summary={summaryQuery.data} loading={summaryQuery.isPending} />}
+      footer={
+        paymentsQuery.data &&
+        paymentsQuery.data.total > 0 && (
+          <PaginationFooter
+            total={paymentsQuery.data.total}
+            page={page}
+            pageSize={limit}
+            pageSizeOptions={pageSizes}
+            label="to'lov"
+            onChange={setPage}
+            onPageSizeChange={setLimit}
+          />
         )
       }
-      onInspectorClose={() => setSelectedId(null)}
     >
       {paymentsQuery.isError ? (
         <Result
@@ -96,17 +108,28 @@ export const PaymentsPage = () => {
           subTitle={getErrorMessage(paymentsQuery.error)}
           extra={<Button onClick={() => paymentsQuery.refetch()}>Qayta urinish</Button>}
         />
+      ) : isMobile ? (
+        <PaymentsCardList
+          payments={payments}
+          loading={paymentsQuery.isFetching}
+          selectedId={selectedId}
+          onOpen={(payment) => setSelectedId(payment.id)}
+        />
       ) : (
         <DataTable
-          columns={paymentsColumns}
+          columns={tableColumns}
           data={payments}
           loading={paymentsQuery.isFetching}
           emptyText="Tanlangan filtrlar bo'yicha to'lovlar yo'q"
-          scrollX={900}
+          minWidth={tableColumns.reduce((sum, column) => sum + Number(column.width), 64)}
+          startIndex={(page - 1) * limit}
+          fixedColumns={1}
           selectedId={selectedId}
-          onRowClick={(payment) => setSelectedId(payment.id)}
         />
       )}
-    </PageLayout>
+      {selectedPayment && (
+        <PaymentInspector payment={selectedPayment} onClose={() => setSelectedId(null)} />
+      )}
+    </PageCard>
   )
 }

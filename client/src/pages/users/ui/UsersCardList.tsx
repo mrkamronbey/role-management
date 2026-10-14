@@ -1,16 +1,16 @@
 import { Card, Empty, Spin, Typography } from 'antd'
-import { RoleTags } from '@/entities/role'
 import { UserAvatar, getFullName, type User } from '@/entities/user'
+import { UserRolesEditor } from '@/features/user-form'
 import { formatDate } from '@/shared/lib/format'
 import { UserRowActions } from './UserRowActions'
 
 interface UsersCardListProps {
   users: User[]
   loading: boolean
-  onSelect: (user: User) => void
+  onEdit: (user: User) => void
 }
 
-export const UsersCardList = ({ users, loading, onSelect }: UsersCardListProps) => {
+export const UsersCardList = ({ users, loading, onEdit }: UsersCardListProps) => {
   if (!loading && users.length === 0) {
     return <Empty className="py-10" description="Foydalanuvchilar topilmadi" />
   }
@@ -19,7 +19,7 @@ export const UsersCardList = ({ users, loading, onSelect }: UsersCardListProps) 
     <Spin spinning={loading}>
       <div className="flex flex-col gap-3">
         {users.map((user) => (
-          <Card key={user.id} size="small" hoverable onClick={() => onSelect(user)}>
+          <Card key={user.id} size="small">
             <div className="flex items-start gap-3">
               <UserAvatar user={user} size="large" />
               <div className="min-w-0 flex-1">
@@ -32,13 +32,13 @@ export const UsersCardList = ({ users, loading, onSelect }: UsersCardListProps) 
               </div>
             </div>
             <div className="mt-3">
-              <RoleTags roles={user.roles} />
+              <UserRolesEditor user={user} />
             </div>
             <div className="mt-3 flex items-center justify-between gap-2">
               <Typography.Text type="secondary" className="text-xs">
                 {formatDate(user.createdAt)}
               </Typography.Text>
-              <UserRowActions user={user} />
+              <UserRowActions user={user} onEdit={onEdit} />
             </div>
           </Card>
         ))}

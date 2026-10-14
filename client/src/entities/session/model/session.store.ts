@@ -8,6 +8,7 @@ export interface SessionUser {
   lastName: string
   email: string
   roles: RoleName[]
+  createdAt: string
 }
 
 interface SessionState {

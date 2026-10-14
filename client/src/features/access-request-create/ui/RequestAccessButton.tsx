@@ -1,23 +1,30 @@
 import { useState } from 'react'
 import { KeyOutlined } from '@ant-design/icons'
-import { App, Button, Form, Input, Modal, Select } from 'antd'
-import type { CreateAccessRequestDto } from '@/entities/access-request'
-import { getErrorMessage } from '@/shared/api'
+import { Button, Form, Input, Modal, Select, Typography } from 'antd'
+import { useMyAccessRequestsQuery, type CreateAccessRequestDto } from '@/entities/access-request'
+import { useUserRoles } from '@/entities/session'
 import { ROLES, ROLE_LABELS, type RoleName } from '@/shared/config'
 import { applyServerErrors } from '@/shared/lib/form'
-import { useOptions } from '@/shared/lib/hooks'
+import { useNotify } from '@/shared/lib/hooks'
 import { useCreateAccessRequest } from '../api/useCreateAccessRequest'
 
 const REQUESTABLE_ROLES: RoleName[] = [ROLES.PAYMENT, ROLES.REPORTS]
 
-const getRole = (role: RoleName) => role
-const getRoleLabel = (role: RoleName) => ROLE_LABELS[role]
-
 export const RequestAccessButton = () => {
   const [open, setOpen] = useState(false)
-  const roleOptions = useOptions(REQUESTABLE_ROLES, getRole, getRoleLabel)
+  const userRoles = useUserRoles()
+  const { data: myRequests = [] } = useMyAccessRequestsQuery()
+  const pendingRoles = myRequests
+    .filter((request) => request.status === 'PENDING')
+    .map((request) => request.role)
+  const roleOptions = REQUESTABLE_ROLES.filter(
+    (role) => !userRoles.includes(role) && !pendingRoles.includes(role),
+  ).map((role) => ({
+    value: role,
+    label: ROLE_LABELS[role],
+  }))
   const [form] = Form.useForm<CreateAccessRequestDto>()
-  const { message } = App.useApp()
+  const notify = useNotify()
   const createRequest = useCreateAccessRequest()
 
   const handleClose = () => {
@@ -28,13 +35,19 @@ export const RequestAccessButton = () => {
   const handleFinish = async (values: CreateAccessRequestDto) => {
     try {
       await createRequest.mutateAsync({ role: values.role, reason: values.reason.trim() })
-      message.success("So'rov yuborildi. Administrator ko'rib chiqadi")
+      notify.success("So'rov yuborildi. Administrator ko'rib chiqadi")
       handleClose()
     } catch (error) {
       if (!applyServerErrors(form, error)) {
-        message.error(getErrorMessage(error))
+        notify.error(error)
       }
     }
+  }
+
+  if (roleOptions.length === 0) {
+    return pendingRoles.length > 0 ? (
+      <Typography.Text type="secondary">So'rovingiz ko'rib chiqilmoqda</Typography.Text>
+    ) : null
   }
 
   return (

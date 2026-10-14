@@ -1,14 +1,17 @@
 import { AuditOutlined, FileDoneOutlined, TeamOutlined, WalletOutlined } from '@ant-design/icons'
-import { Col, Row, Typography, theme } from 'antd'
-import { usePendingRequestsQuery } from '@/entities/access-request'
-import { PaymentStatusTag, usePaymentsQuery, usePaymentsSummaryQuery } from '@/entities/payment'
-import { useReportsQuery } from '@/entities/report'
+import { Alert, Card, Col, Row, Skeleton, Typography, theme } from 'antd'
+import dayjs from 'dayjs'
+import { useAnalyticsQuery } from '@/entities/analytics'
+import { PaymentStatusTag } from '@/entities/payment'
 import { RoleTag } from '@/entities/role'
-import { hasAnyRole, useCurrentUser, useUserRoles } from '@/entities/session'
-import { getFullName, useUsersQuery } from '@/entities/user'
-import { BRAND_COLORS, PAGE_ROLES, ROUTES } from '@/shared/config'
-import { formatMoney, formatRelative } from '@/shared/lib/format'
-import { PageLayout } from '@/shared/ui'
+import { useCurrentUser } from '@/entities/session'
+import { getFullName } from '@/entities/user'
+import { getErrorMessage } from '@/shared/api'
+import { BRAND_COLORS, ROUTES } from '@/shared/config'
+import { formatCompactMoney, formatMoney, formatRelative } from '@/shared/lib/format'
+import { DateRangeFilter, PageCard } from '@/shared/ui'
+import { useDashboardFilters } from '../model/useDashboardFilters'
+import { DashboardCharts } from './charts/DashboardCharts'
 import { RecentListCard } from './RecentListCard'
 import { RecentListItem } from './RecentListItem'
 import { StatCard } from './StatCard'
@@ -16,89 +19,90 @@ import { StatCard } from './StatCard'
 export const DashboardPage = () => {
   const { token } = theme.useToken()
   const user = useCurrentUser()
-  const roles = useUserRoles()
+  const { from, to, setPeriod } = useDashboardFilters()
+  const analyticsQuery = useAnalyticsQuery({ from, to })
+  const analytics = analyticsQuery.data
 
-  const canSeeUsers = hasAnyRole(roles, PAGE_ROLES.users)
-  const canSeeRequests = hasAnyRole(roles, PAGE_ROLES.accessRequests)
-  const canSeePayments = hasAnyRole(roles, PAGE_ROLES.payments)
-  const canSeeReports = hasAnyRole(roles, PAGE_ROLES.reports)
+  const periodText = analytics
+    ? `${dayjs(analytics.period.from).format('DD.MM.YYYY')} – ${dayjs(analytics.period.to).format('DD.MM.YYYY')}`
+    : ''
 
-  const usersQuery = useUsersQuery({ page: 1, limit: 1 }, canSeeUsers)
-  const requestsQuery = usePendingRequestsQuery(canSeeRequests)
-  const paymentsQuery = usePaymentsQuery({ page: 1, limit: 5 }, canSeePayments)
-  const summaryQuery = usePaymentsSummaryQuery({}, canSeePayments)
-  const readyReportsQuery = useReportsQuery({ status: 'READY', page: 1, limit: 1 }, canSeeReports)
+  let content
+  if (analyticsQuery.isPending) {
+    content = (
+      <Card>
+        <Skeleton active paragraph={{ rows: 8 }} />
+      </Card>
+    )
+  } else if (analyticsQuery.isError) {
+    content = <Alert type="error" showIcon title={getErrorMessage(analyticsQuery.error)} />
+  } else {
+    const { users, accessRequests, payments, reports } = analyticsQuery.data
 
-  const pendingRequests = requestsQuery.data?.items ?? []
-  const payments = paymentsQuery.data?.items ?? []
+    const stats = [
+      {
+        title: 'Yangi foydalanuvchilar',
+        value: users.total,
+        icon: <TeamOutlined />,
+        color: token.colorInfo,
+        path: ROUTES.users,
+      },
+      {
+        title: "Kutilayotgan so'rovlar",
+        value: accessRequests.pending,
+        icon: <AuditOutlined />,
+        color: token.colorWarning,
+        path: ROUTES.accessRequests,
+      },
+      {
+        title: "Muvaffaqiyatli to'lovlar",
+        value: (
+          <span title={formatMoney(payments.totalAmount)}>
+            {formatCompactMoney(payments.totalAmount)}
+          </span>
+        ),
+        icon: <WalletOutlined />,
+        color: BRAND_COLORS.primary,
+        path: ROUTES.payments,
+      },
+      {
+        title: 'Tayyor hisobotlar',
+        value: reports.ready,
+        icon: <FileDoneOutlined />,
+        color: token.colorSuccess,
+        path: ROUTES.reports,
+      },
+    ]
 
-  const stats = [
-    {
-      visible: canSeeUsers,
-      title: 'Foydalanuvchilar',
-      value: usersQuery.data?.total ?? '—',
-      icon: <TeamOutlined />,
-      color: token.colorInfo,
-      path: ROUTES.users,
-    },
-    {
-      visible: canSeeRequests,
-      title: "Kutilayotgan so'rovlar",
-      value: requestsQuery.data?.total ?? '—',
-      icon: <AuditOutlined />,
-      color: token.colorWarning,
-      path: ROUTES.accessRequests,
-    },
-    {
-      visible: canSeePayments,
-      title: "Muvaffaqiyatli to'lovlar",
-      value: summaryQuery.data ? formatMoney(summaryQuery.data.totalAmount) : '—',
-      icon: <WalletOutlined />,
-      color: BRAND_COLORS.primary,
-      path: ROUTES.payments,
-    },
-    {
-      visible: canSeeReports,
-      title: 'Tayyor hisobotlar',
-      value: readyReportsQuery.data?.total ?? '—',
-      icon: <FileDoneOutlined />,
-      color: token.colorSuccess,
-      path: ROUTES.reports,
-    },
-  ].filter((stat) => stat.visible)
+    content = (
+      <>
+        <Row gutter={[16, 16]}>
+          {stats.map((stat) => (
+            <Col key={stat.title} xs={12} xl={6}>
+              <StatCard
+                title={stat.title}
+                value={stat.value}
+                icon={stat.icon}
+                color={stat.color}
+                path={stat.path}
+              />
+            </Col>
+          ))}
+        </Row>
 
-  return (
-    <PageLayout
-      header={
-        <Typography.Text type="secondary">
-          Xush kelibsiz, {user ? getFullName(user) : ''}
-        </Typography.Text>
-      }
-    >
-      <Row gutter={[16, 16]}>
-        {stats.map((stat) => (
-          <Col key={stat.title} xs={24} sm={12} xl={6}>
-            <StatCard
-              title={stat.title}
-              value={stat.value}
-              icon={stat.icon}
-              color={stat.color}
-              path={stat.path}
-            />
-          </Col>
-        ))}
-      </Row>
+        <div className="mt-4">
+          <DashboardCharts analytics={analyticsQuery.data} />
+        </div>
 
-      <Row gutter={[16, 16]} className="mt-4">
-        {canSeeRequests && (
+        <Row gutter={[16, 16]} className="mt-4">
           <Col xs={24} xl={12}>
             <RecentListCard
               title="Kutilayotgan so'rovlar"
               path={ROUTES.accessRequests}
-              emptyText="Yangi so'rovlar yo'q"
-              isEmpty={pendingRequests.length === 0}
+              emptyText="Bu davrda yangi so'rovlar yo'q"
+              isEmpty={accessRequests.latest.length === 0}
             >
-              {pendingRequests.slice(0, 4).map((request) => (
+              {accessRequests.latest.map((request) => (
                 <RecentListItem
                   key={request.id}
                   title={getFullName(request.user)}
@@ -108,17 +112,15 @@ export const DashboardPage = () => {
               ))}
             </RecentListCard>
           </Col>
-        )}
 
-        {canSeePayments && (
           <Col xs={24} xl={12}>
             <RecentListCard
               title="So'nggi to'lovlar"
               path={ROUTES.payments}
-              emptyText="To'lovlar yo'q"
-              isEmpty={payments.length === 0}
+              emptyText="Bu davrda to'lovlar yo'q"
+              isEmpty={payments.latest.length === 0}
             >
-              {payments.map((payment) => (
+              {payments.latest.map((payment) => (
                 <RecentListItem
                   key={payment.id}
                   title={payment.payer}
@@ -128,8 +130,22 @@ export const DashboardPage = () => {
               ))}
             </RecentListCard>
           </Col>
-        )}
-      </Row>
-    </PageLayout>
+        </Row>
+      </>
+    )
+  }
+
+  return (
+    <PageCard
+      title={`Xush kelibsiz, ${user ? getFullName(user) : ''}`}
+      extra={<DateRangeFilter from={from} to={to} onChange={setPeriod} />}
+      filters={
+        periodText && (
+          <Typography.Text type="secondary">Ko'rsatilgan davr: {periodText}</Typography.Text>
+        )
+      }
+    >
+      {content}
+    </PageCard>
   )
 }

@@ -16,6 +16,11 @@ export const protectedRoutes: ProtectedRoute[] = [
     lazy: () => import('@/pages/dashboard'),
   },
   {
+    path: ROUTES.profile,
+    title: 'Profil',
+    lazy: () => import('@/pages/profile'),
+  },
+  {
     path: ROUTES.forbidden,
     title: "Ruxsat yo'q",
     lazy: () => import('@/pages/forbidden'),
@@ -25,18 +30,6 @@ export const protectedRoutes: ProtectedRoute[] = [
     title: 'Foydalanuvchilar',
     roles: PAGE_ROLES.users,
     lazy: () => import('@/pages/users'),
-  },
-  {
-    path: ROUTES.userCreate,
-    title: 'Yangi foydalanuvchi',
-    roles: PAGE_ROLES.users,
-    lazy: () => import('@/pages/user-create'),
-  },
-  {
-    path: ROUTES.userEdit,
-    title: 'Foydalanuvchini tahrirlash',
-    roles: PAGE_ROLES.users,
-    lazy: () => import('@/pages/user-edit'),
   },
   {
     path: ROUTES.accessRequests,

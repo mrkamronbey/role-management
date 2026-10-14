@@ -17,3 +17,6 @@ export const getFieldErrors = (error: unknown): FieldError[] => {
   }
   return []
 }
+
+export const getErrorStatus = (error: unknown) =>
+  isAxiosError(error) ? error.response?.status : undefined

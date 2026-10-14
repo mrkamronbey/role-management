@@ -1,4 +1,5 @@
-import { Badge, type MenuProps } from 'antd'
+import { Badge, theme, type MenuProps } from 'antd'
+import { useLocation } from 'react-router'
 import { usePendingRequestsQuery } from '@/entities/access-request'
 import { hasAnyRole, useUserRoles } from '@/entities/session'
 import { NAV_GROUPS, NAV_ITEMS, PAGE_ROLES, ROUTES } from '@/shared/config'
@@ -8,6 +9,9 @@ export const useNavItems = (collapsed: boolean): MenuProps['items'] => {
   const canSeeRequests = hasAnyRole(roles, PAGE_ROLES.accessRequests)
   const pendingQuery = usePendingRequestsQuery(canSeeRequests)
   const pendingCount = pendingQuery.data?.total ?? 0
+  const { pathname } = useLocation()
+  const { token } = theme.useToken()
+  const isRequestsPage = pathname.startsWith(ROUTES.accessRequests)
 
   return NAV_GROUPS.map((group) => ({
     key: group.key,
@@ -23,7 +27,18 @@ export const useNavItems = (collapsed: boolean): MenuProps['items'] => {
       label: item.label,
       extra:
         item.path === ROUTES.accessRequests && pendingCount > 0 ? (
-          <Badge count={pendingCount} color="blue" />
+          <Badge
+            count={pendingCount}
+            title={`${pendingCount} ta kutilayotgan so'rov`}
+            styles={{
+              indicator: {
+                boxShadow: 'none',
+                fontWeight: 600,
+                color: isRequestsPage ? token.colorPrimary : '#FFFFFF',
+                backgroundColor: isRequestsPage ? '#FFFFFF' : token.colorPrimary,
+              },
+            }}
+          />
         ) : null,
     })),
   })).filter((group) => group.children.length > 0)

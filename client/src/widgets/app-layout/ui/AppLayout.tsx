@@ -16,10 +16,14 @@ export const AppLayout = () => {
       {isMobile ? (
         <MobileNavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       ) : (
-        <AppSider collapsed={collapsed} onToggleCollapse={() => setCollapsed(!collapsed)} />
+        <AppSider collapsed={collapsed} />
       )}
       <Layout className="min-w-0">
-        <AppHeader isMobile={isMobile} onMenuClick={() => setDrawerOpen(true)} />
+        <AppHeader
+          isMobile={isMobile}
+          collapsed={collapsed}
+          onMenuClick={() => (isMobile ? setDrawerOpen(true) : setCollapsed(!collapsed))}
+        />
         <Layout.Content className="min-h-0 flex-1">
           <Outlet />
         </Layout.Content>

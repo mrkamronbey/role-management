@@ -29,6 +29,13 @@ export interface PaymentsParams extends PaymentsPeriod, PaginationParams {
   search?: string
 }
 
+export type PaymentsExportFormat = 'csv' | 'xlsx'
+
+export interface PaymentsExportParams extends PaymentsPeriod {
+  status?: PaymentStatus
+  format: PaymentsExportFormat
+}
+
 export interface PaymentsSummary {
   totalAmount: number
   success: number

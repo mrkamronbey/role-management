@@ -1,14 +1,15 @@
 import { DeleteOutlined } from '@ant-design/icons'
-import { App, Button, Popconfirm, Tooltip } from 'antd'
+import { Button, Tooltip } from 'antd'
 import { useCurrentUser } from '@/entities/session'
 import { getFullName, type User } from '@/entities/user'
-import { getErrorMessage } from '@/shared/api'
 import { ROLES } from '@/shared/config'
+import { useConfirm, useNotify } from '@/shared/lib/hooks'
 import { useDeleteUser } from '../api/useDeleteUser'
 
 export const DeleteUserButton = ({ user }: { user: User }) => {
   const currentUser = useCurrentUser()
-  const { message } = App.useApp()
+  const confirm = useConfirm()
+  const notify = useNotify()
   const deleteUser = useDeleteUser()
 
   if (user.id === currentUser?.id || user.roles.includes(ROLES.ADMIN)) {
@@ -27,21 +28,30 @@ export const DeleteUserButton = ({ user }: { user: User }) => {
   const handleDelete = async () => {
     try {
       await deleteUser.mutateAsync(user.id)
-      message.success("Foydalanuvchi o'chirildi")
+      notify.success("Foydalanuvchi o'chirildi")
     } catch (error) {
-      message.error(getErrorMessage(error))
+      notify.error(error)
     }
   }
 
+  const confirmDelete = () =>
+    confirm({
+      danger: true,
+      icon: <DeleteOutlined />,
+      title: "Foydalanuvchini o'chirish",
+      description: `${getFullName(user)} tizimdan butunlay o'chiriladi. Bu amalni ortga qaytarib bo'lmaydi.`,
+      okText: "O'chirish",
+      onOk: handleDelete,
+    })
+
   return (
-    <Popconfirm
-      title={`${getFullName(user)} o'chirilsinmi?`}
-      okText="O'chirish"
-      cancelText="Bekor qilish"
-      okButtonProps={{ danger: true }}
-      onConfirm={handleDelete}
-    >
-      <Button danger icon={<DeleteOutlined />} />
-    </Popconfirm>
+    <Tooltip title="O'chirish">
+      <Button
+        danger
+        icon={<DeleteOutlined />}
+        loading={deleteUser.isPending}
+        onClick={confirmDelete}
+      />
+    </Tooltip>
   )
 }

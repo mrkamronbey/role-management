@@ -1,69 +1,116 @@
+import type { ReactNode } from 'react'
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
   WalletOutlined,
 } from '@ant-design/icons'
-import { Typography, theme } from 'antd'
+import { Card, Col, Progress, Row, Skeleton, Typography, theme } from 'antd'
 import type { PaymentsSummary } from '@/entities/payment'
 import { BRAND_COLORS } from '@/shared/config'
 import { formatMoney } from '@/shared/lib/format'
+import { useIsMobile } from '@/shared/lib/hooks'
 
 interface PaymentsStatsProps {
   summary?: PaymentsSummary
   loading: boolean
 }
 
+interface StatCardProps {
+  title: string
+  value: ReactNode
+  icon: ReactNode
+  color: string
+  extra?: ReactNode
+  loading: boolean
+  compact?: boolean
+}
+
+const StatCard = ({ title, value, icon, color, extra, loading, compact }: StatCardProps) => (
+  <Card
+    size="small"
+    className="h-full border-(--ant-color-border)"
+    styles={{ body: { padding: '10px 12px' } }}
+  >
+    <div className="flex items-center gap-3">
+      {!compact && (
+        <div
+          className="flex size-9 shrink-0 items-center justify-center rounded-lg text-base"
+          style={{ color, backgroundColor: `${color}1A` }}
+        >
+          {icon}
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <Typography.Text type="secondary" ellipsis className="block text-xs">
+          {title}
+        </Typography.Text>
+        <div className="text-base font-semibold whitespace-nowrap">
+          {loading ? <Skeleton.Input active size="small" /> : value}
+        </div>
+      </div>
+      {!compact && extra}
+    </div>
+  </Card>
+)
+
 export const PaymentsStats = ({ summary, loading }: PaymentsStatsProps) => {
   const { token } = theme.useToken()
+  const isMobile = useIsMobile()
+  const success = summary?.success ?? 0
+  const pending = summary?.pending ?? 0
+  const failed = summary?.failed ?? 0
+  const total = success + pending + failed
 
-  const stats = [
-    {
-      title: 'Jami summa',
-      value: formatMoney(summary?.totalAmount ?? 0),
-      icon: <WalletOutlined />,
-      color: BRAND_COLORS.primary,
-    },
+  const share = (count: number) => (total > 0 ? Math.round((count / total) * 100) : 0)
+
+  const statuses = [
     {
       title: 'Muvaffaqiyatli',
-      value: summary?.success ?? 0,
+      count: success,
       icon: <CheckCircleOutlined />,
       color: token.colorSuccess,
     },
     {
       title: 'Kutilmoqda',
-      value: summary?.pending ?? 0,
+      count: pending,
       icon: <ClockCircleOutlined />,
       color: token.colorWarning,
     },
-    {
-      title: 'Rad etilgan',
-      value: summary?.failed ?? 0,
-      icon: <CloseCircleOutlined />,
-      color: token.colorError,
-    },
+    { title: 'Rad etilgan', count: failed, icon: <CloseCircleOutlined />, color: token.colorError },
   ]
 
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
-      {stats.map((stat) => (
-        <div key={stat.title} className="flex items-center gap-3">
-          <div
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-base"
-            style={{ color: stat.color, backgroundColor: `${stat.color}1A` }}
-          >
-            {stat.icon}
-          </div>
-          <div className="leading-tight">
-            <Typography.Text type="secondary" className="block text-xs">
-              {stat.title}
-            </Typography.Text>
-            <Typography.Text strong className="text-base">
-              {loading ? '—' : stat.value}
-            </Typography.Text>
-          </div>
-        </div>
+    <Row gutter={[8, 8]}>
+      <Col xs={24} sm={12} xl={6}>
+        <StatCard
+          title={`Jami summa · ${total} ta to'lov`}
+          value={formatMoney(summary?.totalAmount ?? 0)}
+          icon={<WalletOutlined />}
+          color={BRAND_COLORS.primary}
+          loading={loading}
+        />
+      </Col>
+      {statuses.map((status) => (
+        <Col key={status.title} xs={8} sm={12} xl={6}>
+          <StatCard
+            compact={isMobile}
+            title={status.title}
+            value={status.count}
+            icon={status.icon}
+            color={status.color}
+            loading={loading}
+            extra={
+              <Progress
+                type="circle"
+                size={38}
+                percent={share(status.count)}
+                strokeColor={status.color}
+              />
+            }
+          />
+        </Col>
       ))}
-    </div>
+    </Row>
   )
 }

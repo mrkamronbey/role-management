@@ -1,38 +1,43 @@
-import { MenuOutlined } from '@ant-design/icons'
+import { MenuFoldOutlined, MenuOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
 import { Button, Layout, Typography, theme } from 'antd'
 import { useMatches } from 'react-router'
-import { GlobalSearch } from '@/features/global-search'
 import { ThemeToggle } from '@/features/theme-toggle'
 import type { RouteHandle } from '@/shared/config'
-import { NotificationBell } from './NotificationBell'
+import { UserMenu } from './UserMenu'
 
 interface AppHeaderProps {
   isMobile: boolean
+  collapsed: boolean
   onMenuClick: () => void
 }
 
-export const AppHeader = ({ isMobile, onMenuClick }: AppHeaderProps) => {
+export const AppHeader = ({ isMobile, collapsed, onMenuClick }: AppHeaderProps) => {
   const { token } = theme.useToken()
   const matches = useMatches()
-  const currentRoute = matches[matches.length - 1]
-  const title = (currentRoute?.handle as RouteHandle | undefined)?.title
+  const title = (matches[matches.length - 1]?.handle as RouteHandle | undefined)?.title
+
+  let menuIcon = collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />
+  if (isMobile) {
+    menuIcon = <MenuOutlined />
+  }
 
   return (
     <Layout.Header
       className="flex items-center justify-between gap-3"
       style={{ borderBottom: `1px solid ${token.colorBorderSecondary}` }}
     >
-      {isMobile ? (
-        <Button type="text" icon={<MenuOutlined />} onClick={onMenuClick} />
-      ) : (
-        <Typography.Text strong className="truncate text-lg">
-          {title}
-        </Typography.Text>
-      )}
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-1">
-        <GlobalSearch />
-        <NotificationBell />
+      <Button type="text" aria-label="Menyu" icon={menuIcon} onClick={onMenuClick} />
+      <Typography.Title
+        level={4}
+        ellipsis
+        className="m-0! min-w-0 flex-1"
+        style={{ fontSize: isMobile ? 16 : 20 }}
+      >
+        {title}
+      </Typography.Title>
+      <div className="flex shrink-0 items-center gap-2">
         <ThemeToggle />
+        <UserMenu />
       </div>
     </Layout.Header>
   )

@@ -25,4 +25,8 @@ export interface CreateAccessRequestDto {
 
 export interface AccessRequestsParams extends PaginationParams {
   status?: 'pending' | 'reviewed'
+  search?: string
+  role?: RoleName
+  from?: string
+  to?: string
 }

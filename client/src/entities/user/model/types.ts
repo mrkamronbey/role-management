@@ -22,6 +22,8 @@ export type UpdateUserDto = Partial<CreateUserDto>
 export interface UsersParams {
   search?: string
   role?: RoleName
+  from?: string
+  to?: string
   page: number
   limit: number
 }

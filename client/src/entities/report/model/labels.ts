@@ -9,5 +9,5 @@ export const REPORT_TYPE_LABELS: Record<ReportType, string> = {
 
 export const REPORT_STATUS_META: Record<ReportStatus, { label: string; color: string }> = {
   READY: { label: 'Tayyor', color: 'success' },
-  PROCESSING: { label: 'Tayyorlanmoqda', color: 'processing' },
+  PROCESSING: { label: 'Tayyorlanmoqda', color: 'gold' },
 }

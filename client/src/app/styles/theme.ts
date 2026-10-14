@@ -4,6 +4,7 @@ import type { ThemeMode } from '@/shared/lib/theme'
 
 const palettes = {
   light: {
+    primary: BRAND_COLORS.primary,
     text: '#404349',
     textSecondary: '#606671',
     textPlaceholder: '#6F747F',
@@ -15,8 +16,10 @@ const palettes = {
     border: '#D5D7DB',
     borderSecondary: '#E8E9EC',
     primaryBg: '#FAF1DC',
+    rowHover: '#ECEEF1',
   },
   dark: {
+    primary: '#D4A73A',
     text: '#D2D5DA',
     textSecondary: '#8B9098',
     textPlaceholder: '#565761',
@@ -27,7 +30,8 @@ const palettes = {
     fill: '#1E1F2C',
     border: '#2B2C38',
     borderSecondary: '#222329',
-    primaryBg: '#3B3428',
+    primaryBg: '#3F3725',
+    rowHover: '#26273A',
   },
 }
 
@@ -38,8 +42,8 @@ export const getThemeConfig = (mode: ThemeMode): ThemeConfig => {
   return {
     algorithm: mode === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
     token: {
-      colorPrimary: BRAND_COLORS.primary,
-      colorLink: BRAND_COLORS.primary,
+      colorPrimary: colors.primary,
+      colorLink: colors.primary,
       colorText: colors.text,
       colorTextSecondary: colors.textSecondary,
       colorTextPlaceholder: colors.textPlaceholder,
@@ -51,7 +55,7 @@ export const getThemeConfig = (mode: ThemeMode): ThemeConfig => {
       colorBorderSecondary: colors.borderSecondary,
       colorPrimaryBg: colors.primaryBg,
       borderRadius: 12,
-      controlHeight: 35,
+      controlHeight: 40,
       fontFamily: "'Gilroy', -apple-system, 'Segoe UI', Roboto, sans-serif",
     },
     components: {
@@ -66,7 +70,7 @@ export const getThemeConfig = (mode: ThemeMode): ThemeConfig => {
         fontWeight: 500,
         primaryColor: '#FFFFFF',
       },
-      Input: inputColors,
+      Input: { ...inputColors, paddingInlineLG: 16 },
       InputNumber: inputColors,
       Select: inputColors,
       DatePicker: inputColors,
@@ -74,12 +78,14 @@ export const getThemeConfig = (mode: ThemeMode): ThemeConfig => {
         headerBg: colors.fill,
         headerColor: colors.textSecondary,
         headerSplitColor: 'transparent',
-        rowHoverBg: colors.fill,
+        headerBorderRadius: 0,
+        rowHoverBg: colors.rowHover,
         borderColor: colors.borderSecondary,
+        fontWeightStrong: 500,
       },
       Segmented: {
         borderRadiusSM: 10,
-        itemSelectedBg: BRAND_COLORS.primary,
+        itemSelectedBg: colors.primary,
         itemSelectedColor: '#FFFFFF',
       },
       Menu: {
@@ -89,8 +95,15 @@ export const getThemeConfig = (mode: ThemeMode): ThemeConfig => {
         itemBorderRadius: 10,
         groupTitleFontSize: 10,
         itemColor: colors.menuText,
-        itemSelectedBg: BRAND_COLORS.primary,
+        itemSelectedBg: colors.primary,
         itemSelectedColor: '#FFFFFF',
+      },
+      Card: {
+        boxShadowTertiary: 'none',
+      },
+      Pagination: {
+        itemSize: 36,
+        borderRadius: 10,
       },
     },
   }

@@ -1,28 +1,40 @@
-import { useState } from 'react'
-import { Button, Result, Segmented, Skeleton, Typography } from 'antd'
+import { Button, Col, Flex, Result, Row, Segmented, Select, Skeleton, Typography } from 'antd'
 import { useAccessRequestsQuery, usePendingRequestsQuery } from '@/entities/access-request'
 import { getErrorMessage } from '@/shared/api'
-import { EmptyState, PageLayout, PaginationFooter } from '@/shared/ui'
+import { ROLES, ROLE_LABELS } from '@/shared/config'
+import { useIsMobile } from '@/shared/lib/hooks'
+import {
+  EmptyState,
+  PageCard,
+  PaginationFooter,
+  RefreshButton,
+  SearchInput,
+  ViewSwitcher,
+  DateRangeFilter,
+} from '@/shared/ui'
+import { useAccessRequestsFilters, type Tab } from '../model/useAccessRequestsFilters'
 import { AccessRequestCard } from './AccessRequestCard'
+import { AccessRequestRow } from './AccessRequestRow'
 
-type Tab = 'pending' | 'reviewed'
-
-const PAGE_SIZE = 10
+const roleOptions = [ROLES.PAYMENT, ROLES.REPORTS].map((role) => ({
+  value: role,
+  label: ROLE_LABELS[role],
+}))
 
 export const AccessRequestsPage = () => {
-  const [tab, setTab] = useState<Tab>('pending')
-  const [page, setPage] = useState(1)
+  const filters = useAccessRequestsFilters()
+  const isMobile = useIsMobile()
+  const { tab, search, role, from, to, view, page, limit } = filters
   const pendingQuery = usePendingRequestsQuery()
-  const { data, isPending, isError, error, refetch } = useAccessRequestsQuery({
+  const { data, isPending, isFetching, isError, error, refetch } = useAccessRequestsQuery({
     status: tab,
+    search: search || undefined,
+    role,
+    from,
+    to,
     page,
-    limit: PAGE_SIZE,
+    limit,
   })
-
-  const handleTabChange = (value: Tab) => {
-    setTab(value)
-    setPage(1)
-  }
 
   let content
   if (isPending) {
@@ -39,16 +51,32 @@ export const AccessRequestsPage = () => {
   } else if (data.items.length === 0) {
     content = (
       <EmptyState
-        description={tab === 'pending' ? "Yangi so'rovlar yo'q" : "Ko'rib chiqilgan so'rovlar yo'q"}
+        description={
+          search || role || from || to
+            ? "Tanlangan filtrlar bo'yicha so'rov topilmadi"
+            : tab === 'pending'
+              ? "Yangi so'rovlar yo'q"
+              : "Ko'rib chiqilgan so'rovlar yo'q"
+        }
       />
+    )
+  } else if (view === 'list') {
+    content = (
+      <Flex vertical gap={12}>
+        {data.items.map((request) => (
+          <AccessRequestRow key={request.id} request={request} />
+        ))}
+      </Flex>
     )
   } else {
     content = (
-      <div className="flex flex-col gap-3">
+      <Row gutter={[16, 16]}>
         {data.items.map((request) => (
-          <AccessRequestCard key={request.id} request={request} />
+          <Col key={request.id} xs={24} xl={12}>
+            <AccessRequestCard request={request} />
+          </Col>
         ))}
-      </div>
+      </Row>
     )
   }
 
@@ -56,33 +84,58 @@ export const AccessRequestsPage = () => {
     <PaginationFooter
       total={data.total}
       page={page}
-      pageSize={PAGE_SIZE}
+      pageSize={limit}
+      pageSizeOptions={filters.pageSizes}
       label="so'rov"
-      onChange={setPage}
+      onChange={filters.setPage}
+      onPageSizeChange={filters.setLimit}
     />
   )
 
   return (
-    <PageLayout
-      header={
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <Typography.Text type="secondary">
-            Xodim yopiq bo'limga kirmoqchi bo'lsa, so'rov shu yerga keladi. Tasdiqlansa, rol darhol
-            biriktiriladi.
-          </Typography.Text>
+    <PageCard
+      extra={
+        <>
+          <SearchInput
+            value={search}
+            placeholder="Xodim ismi yoki email"
+            onSearch={filters.setSearch}
+            className="w-56"
+          />
+          <Select
+            allowClear
+            placeholder="Rol"
+            options={roleOptions}
+            value={role}
+            onChange={filters.setRole}
+            className="w-36"
+          />
+          <DateRangeFilter from={from} to={to} onChange={filters.setPeriod} />
+          <ViewSwitcher value={view} onChange={filters.setView} />
+          <RefreshButton loading={isFetching} onClick={() => refetch()} />
+        </>
+      }
+      filters={
+        <Flex vertical={isMobile} wrap align={isMobile ? undefined : 'center'} gap={12}>
           <Segmented<Tab>
+            block={isMobile}
             value={tab}
-            onChange={handleTabChange}
+            onChange={filters.setTab}
             options={[
               { value: 'pending', label: `Kutilmoqda · ${pendingQuery.data?.total ?? 0}` },
               { value: 'reviewed', label: "Ko'rib chiqilgan" },
             ]}
+            className="border border-(--ant-color-border) bg-(--ant-color-bg-container) p-px!"
           />
-        </div>
+          <Typography.Text type="secondary">
+            Xodim yopiq bo'limga kirmoqchi bo'lsa, so'rov shu yerga keladi. Tasdiqlansa, rol darhol
+            biriktiriladi.
+          </Typography.Text>
+        </Flex>
       }
       footer={footer}
     >
       {content}
-    </PageLayout>
+    </PageCard>
   )
 }

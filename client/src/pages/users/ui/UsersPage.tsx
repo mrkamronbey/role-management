@@ -1,27 +1,35 @@
 import { useState } from 'react'
+import { PlusOutlined } from '@ant-design/icons'
 import { Button, Result, Skeleton } from 'antd'
-import { useUsersQuery } from '@/entities/user'
+import { PrivateComponent } from '@/entities/session'
+import { useUsersQuery, type User } from '@/entities/user'
+import { UserFormModal } from '@/features/user-form'
 import { getErrorMessage } from '@/shared/api'
+import { ROLES } from '@/shared/config'
 import { useIsMobile } from '@/shared/lib/hooks'
-import { USERS_PAGE_SIZE, useUsersFilters } from '../model/useUsersFilters'
-import { UserInspector } from './UserInspector'
+import { DataTable, DateRangeFilter, PageCard, PaginationFooter, RefreshButton } from '@/shared/ui'
+import { useUsersFilters } from '../model/useUsersFilters'
 import { UsersCardList } from './UsersCardList'
-import { usersColumns } from './usersColumns'
-import { UsersToolbar } from './UsersToolbar'
-import { DataTable, PageLayout, PaginationFooter } from '@/shared/ui'
+import { getUsersColumns } from './usersColumns'
+import { UsersFilters } from './UsersFilters'
 
 export const UsersPage = () => {
   const isMobile = useIsMobile()
-  const { search, role, page, setSearch, setRole, setPage } = useUsersFilters()
-  const [selectedId, setSelectedId] = useState<number | null>(null)
+  const filters = useUsersFilters()
+  const { search, role, from, to, page, limit } = filters
+  const [modal, setModal] = useState<{ open: boolean; user?: User }>({ open: false })
   const { data, isPending, isFetching, isError, error, refetch } = useUsersQuery({
     search: search || undefined,
     role,
+    from,
+    to,
     page,
-    limit: USERS_PAGE_SIZE,
+    limit,
   })
 
-  const selectedUser = data?.items.find((user) => user.id === selectedId)
+  const openCreate = () => setModal({ open: true })
+  const openEdit = (user: User) => setModal({ open: true, user })
+  const closeModal = () => setModal({ ...modal, open: false })
 
   let content
   if (isPending) {
@@ -36,48 +44,55 @@ export const UsersPage = () => {
       />
     )
   } else if (isMobile) {
-    content = (
-      <UsersCardList
-        users={data.items}
-        loading={isFetching}
-        onSelect={(user) => setSelectedId(user.id)}
-      />
-    )
+    content = <UsersCardList users={data.items} loading={isFetching} onEdit={openEdit} />
   } else {
     content = (
       <DataTable
-        columns={usersColumns}
+        columns={getUsersColumns(openEdit)}
         data={data.items}
         loading={isFetching}
         emptyText="Foydalanuvchilar topilmadi"
-        selectedId={selectedId}
-        onRowClick={(user) => setSelectedId(user.id)}
+        startIndex={(page - 1) * limit}
       />
     )
   }
 
-  const footer = data && data.total > 0 && (
-    <PaginationFooter
-      total={data.total}
-      page={page}
-      pageSize={USERS_PAGE_SIZE}
-      label="foydalanuvchi"
-      onChange={setPage}
-    />
-  )
-
   return (
-    <PageLayout
-      header={
-        <UsersToolbar search={search} role={role} onSearch={setSearch} onRoleChange={setRole} />
+    <PageCard
+      extra={
+        <>
+          <UsersFilters
+            search={search}
+            role={role}
+            onSearch={filters.setSearch}
+            onRoleChange={filters.setRole}
+          />
+          <DateRangeFilter from={from} to={to} onChange={filters.setPeriod} />
+          <RefreshButton loading={isFetching} onClick={() => refetch()} />
+          <PrivateComponent roles={[ROLES.ADMIN]}>
+            <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+              {!isMobile && "Qo'shish"}
+            </Button>
+          </PrivateComponent>
+        </>
       }
-      footer={footer}
-      inspector={
-        selectedUser && <UserInspector user={selectedUser} onClose={() => setSelectedId(null)} />
+      footer={
+        data &&
+        data.total > 0 && (
+          <PaginationFooter
+            total={data.total}
+            page={page}
+            pageSize={limit}
+            pageSizeOptions={filters.pageSizes}
+            label="foydalanuvchi"
+            onChange={filters.setPage}
+            onPageSizeChange={filters.setLimit}
+          />
+        )
       }
-      onInspectorClose={() => setSelectedId(null)}
     >
       {content}
-    </PageLayout>
+      <UserFormModal open={modal.open} user={modal.user} onClose={closeModal} />
+    </PageCard>
   )
 }

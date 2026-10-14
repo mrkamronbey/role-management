@@ -12,7 +12,7 @@ import { ROUTES } from './routes'
 type PageName = 'dashboard' | 'users' | 'accessRequests' | 'payments' | 'reports'
 
 export const PAGE_ROLES: Record<PageName, RoleName[]> = {
-  dashboard: [ROLES.ADMIN, ROLES.PAYMENT, ROLES.REPORTS],
+  dashboard: [ROLES.ADMIN],
   users: [ROLES.ADMIN],
   accessRequests: [ROLES.ADMIN],
   payments: [ROLES.PAYMENT],

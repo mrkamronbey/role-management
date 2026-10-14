@@ -5,6 +5,7 @@ import { accessRequestApi } from './accessRequest.api'
 export const accessRequestKeys = {
   all: ['access-requests'],
   list: (params: AccessRequestsParams) => ['access-requests', params],
+  mine: ['access-requests', 'my'],
 }
 
 export const useAccessRequestsQuery = (params: AccessRequestsParams, enabled = true) =>
@@ -17,3 +18,9 @@ export const useAccessRequestsQuery = (params: AccessRequestsParams, enabled = t
 
 export const usePendingRequestsQuery = (enabled = true) =>
   useAccessRequestsQuery({ status: 'pending', page: 1, limit: 5 }, enabled)
+
+export const useMyAccessRequestsQuery = () =>
+  useQuery({
+    queryKey: accessRequestKeys.mine,
+    queryFn: accessRequestApi.getMine,
+  })

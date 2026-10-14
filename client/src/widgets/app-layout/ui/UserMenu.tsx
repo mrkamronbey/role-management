@@ -1,16 +1,15 @@
-import { useState } from 'react'
 import { DownOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons'
 import { Dropdown, Typography, type MenuProps } from 'antd'
+import { useNavigate } from 'react-router'
 import { useCurrentUser } from '@/entities/session'
 import { UserAvatar, getFullName } from '@/entities/user'
 import { useLogout } from '@/features/auth/logout'
-import { ROLE_LABELS } from '@/shared/config'
-import { ProfileModal } from './ProfileModal'
+import { ROLE_LABELS, ROUTES } from '@/shared/config'
 
-export const UserMenu = ({ collapsed = false }: { collapsed?: boolean }) => {
+export const UserMenu = () => {
   const user = useCurrentUser()
   const logout = useLogout()
-  const [profileOpen, setProfileOpen] = useState(false)
+  const navigate = useNavigate()
 
   if (!user) {
     return null
@@ -38,32 +37,25 @@ export const UserMenu = ({ collapsed = false }: { collapsed?: boolean }) => {
       key: 'profile',
       label: 'Profil',
       icon: <UserOutlined />,
-      onClick: () => setProfileOpen(true),
+      onClick: () => navigate(ROUTES.profile),
     },
     { key: 'logout', label: 'Chiqish', icon: <LogoutOutlined />, danger: true, onClick: logout },
   ]
 
   return (
-    <>
-      <Dropdown menu={{ items }} trigger={['click']} placement="topLeft">
-        <div className="flex min-w-0 flex-1 cursor-pointer items-center justify-center gap-3">
-          <UserAvatar user={user} shape="square" size={36} />
-          {!collapsed && (
-            <>
-              <div className="min-w-0 flex-1 leading-tight">
-                <Typography.Text strong className="block truncate">
-                  {getFullName(user)}
-                </Typography.Text>
-                <Typography.Text type="secondary" className="block truncate text-xs">
-                  {roleLabel}
-                </Typography.Text>
-              </div>
-              <DownOutlined className="text-xs opacity-50" />
-            </>
-          )}
+    <Dropdown menu={{ items }} trigger={['click']} placement="bottomRight">
+      <div className="flex min-w-0 cursor-pointer items-center gap-3 ps-2">
+        <UserAvatar user={user} shape="square" size={36} />
+        <div className="hidden max-w-48 min-w-0 leading-tight sm:block">
+          <Typography.Text strong className="block truncate">
+            {getFullName(user)}
+          </Typography.Text>
+          <Typography.Text type="secondary" className="block truncate text-xs">
+            {roleLabel}
+          </Typography.Text>
         </div>
-      </Dropdown>
-      <ProfileModal user={user} open={profileOpen} onClose={() => setProfileOpen(false)} />
-    </>
+        <DownOutlined className="text-xs opacity-50" />
+      </div>
+    </Dropdown>
   )
 }

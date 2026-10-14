@@ -1,9 +1,16 @@
-import { App, Button } from 'antd'
-import { getErrorMessage } from '@/shared/api'
+import {
+  CheckCircleOutlined,
+  CheckOutlined,
+  CloseCircleOutlined,
+  CloseOutlined,
+} from '@ant-design/icons'
+import { Button, Flex } from 'antd'
+import { useConfirm, useNotify } from '@/shared/lib/hooks'
 import { useReviewAccessRequest } from '../api/useReviewAccessRequest'
 
 export const ReviewButtons = ({ requestId }: { requestId: number }) => {
-  const { message } = App.useApp()
+  const confirm = useConfirm()
+  const notify = useNotify()
   const review = useReviewAccessRequest()
   const isThisRequest = review.isPending && review.variables?.id === requestId
   const isApproving = isThisRequest && review.variables?.approve === true
@@ -12,25 +19,51 @@ export const ReviewButtons = ({ requestId }: { requestId: number }) => {
   const handleReview = async (approve: boolean) => {
     try {
       await review.mutateAsync({ id: requestId, approve })
-      message.success(approve ? 'Rol biriktirildi' : "So'rov rad etildi")
+      notify.success(approve ? 'Rol biriktirildi' : "So'rov rad etildi")
     } catch (error) {
-      message.error(getErrorMessage(error))
+      notify.error(error)
     }
   }
 
+  const confirmReject = () =>
+    confirm({
+      danger: true,
+      icon: <CloseCircleOutlined />,
+      title: "So'rovni rad etish",
+      description: "Xodimga rol berilmaydi. So'rov \"Ko'rib chiqilgan\" bo'limiga o'tadi.",
+      okText: 'Rad etish',
+      onOk: () => handleReview(false),
+    })
+
+  const confirmApprove = () =>
+    confirm({
+      icon: <CheckCircleOutlined />,
+      title: "So'rovni tasdiqlash",
+      description: "Xodimga shu rol darhol biriktiriladi va bo'lim uning menyusida paydo bo'ladi.",
+      okText: 'Tasdiqlash',
+      onOk: () => handleReview(true),
+    })
+
   return (
-    <div className="flex gap-2">
-      <Button onClick={() => handleReview(false)} loading={isRejecting} disabled={isApproving}>
+    <Flex gap={8}>
+      <Button
+        danger
+        icon={<CloseOutlined />}
+        loading={isRejecting}
+        disabled={isApproving}
+        onClick={confirmReject}
+      >
         Rad etish
       </Button>
       <Button
         type="primary"
-        onClick={() => handleReview(true)}
+        icon={<CheckOutlined />}
         loading={isApproving}
         disabled={isRejecting}
+        onClick={confirmApprove}
       >
         Tasdiqlash
       </Button>
-    </div>
+    </Flex>
   )
 }

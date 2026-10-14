@@ -1,10 +1,10 @@
 import type { TableColumnsType } from 'antd'
-import { RoleTags } from '@/entities/role'
 import { UserAvatar, getFullName, type User } from '@/entities/user'
+import { UserRolesEditor } from '@/features/user-form'
 import { formatDate } from '@/shared/lib/format'
 import { UserRowActions } from './UserRowActions'
 
-export const usersColumns: TableColumnsType<User> = [
+export const getUsersColumns = (onEdit: (user: User) => void): TableColumnsType<User> => [
   {
     title: 'F.I.Sh',
     key: 'fullName',
@@ -18,9 +18,9 @@ export const usersColumns: TableColumnsType<User> = [
   { title: 'Email', dataIndex: 'email', key: 'email' },
   {
     title: 'Rollar',
-    dataIndex: 'roles',
     key: 'roles',
-    render: (roles: User['roles']) => <RoleTags roles={roles} />,
+    width: 300,
+    render: (_, user) => <UserRolesEditor user={user} />,
   },
   {
     title: 'Yaratilgan sana',
@@ -33,6 +33,6 @@ export const usersColumns: TableColumnsType<User> = [
     title: 'Amallar',
     key: 'actions',
     width: 120,
-    render: (_, user) => <UserRowActions user={user} />,
+    render: (_, user) => <UserRowActions user={user} onEdit={onEdit} />,
   },
 ]
