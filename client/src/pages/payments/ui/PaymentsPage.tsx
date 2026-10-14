@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Result, Select } from 'antd'
+import { Select } from 'antd'
 import {
   PAYMENT_STATUS_META,
   usePaymentsQuery,
@@ -7,16 +7,17 @@ import {
   type PaymentStatus,
 } from '@/entities/payment'
 import { ExportPaymentsButton } from '@/features/payments-export'
-import { getErrorMessage } from '@/shared/api'
 import { useIsMobile, useLocalStorage } from '@/shared/lib/hooks'
 import {
   ColumnSelector,
   DataTable,
   DateRangeFilter,
+  ErrorResult,
   PageCard,
   PaginationFooter,
   RefreshButton,
 } from '@/shared/ui'
+import { toOptions } from '@/shared/lib/options'
 import { usePaymentsFilters } from '../model/usePaymentsFilters'
 import { PaymentInspector } from './PaymentInspector'
 import { PaymentsCardList } from './PaymentsCardList'
@@ -28,10 +29,7 @@ import {
   paymentsColumns,
 } from './paymentsColumns'
 
-const statusOptions = Object.entries(PAYMENT_STATUS_META).map(([value, meta]) => ({
-  value,
-  label: meta.label,
-}))
+const statusOptions = toOptions(PAYMENT_STATUS_META)
 
 export const PaymentsPage = () => {
   const { from, to, status, page, limit, pageSizes, setPeriod, setStatus, setPage, setLimit } =
@@ -102,11 +100,10 @@ export const PaymentsPage = () => {
       }
     >
       {paymentsQuery.isError ? (
-        <Result
-          status="error"
+        <ErrorResult
           title="To'lovlarni yuklab bo'lmadi"
-          subTitle={getErrorMessage(paymentsQuery.error)}
-          extra={<Button onClick={() => paymentsQuery.refetch()}>Qayta urinish</Button>}
+          error={paymentsQuery.error}
+          onRetry={paymentsQuery.refetch}
         />
       ) : isMobile ? (
         <PaymentsCardList

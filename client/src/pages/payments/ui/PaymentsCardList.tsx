@@ -1,8 +1,9 @@
 import { ArrowRightOutlined, FileTextOutlined } from '@ant-design/icons'
-import { Button, Card, Empty, Flex, Spin, Typography } from 'antd'
+import { Button, Card, Flex, Spin, Typography } from 'antd'
 import { PaymentStatusTag, type Payment } from '@/entities/payment'
 import { DownloadReceiptButton } from '@/features/payments-export'
 import { formatDateTime, formatMoney } from '@/shared/lib/format'
+import { EmptyState } from '@/shared/ui'
 
 interface PaymentsCardListProps {
   payments: Payment[]
@@ -18,7 +19,7 @@ export const PaymentsCardList = ({
   onOpen,
 }: PaymentsCardListProps) => {
   if (!loading && payments.length === 0) {
-    return <Empty className="py-10" description="Tanlangan filtrlar bo'yicha to'lovlar yo'q" />
+    return <EmptyState description="Tanlangan filtrlar bo'yicha to'lovlar yo'q" />
   }
 
   return (

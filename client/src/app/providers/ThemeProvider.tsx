@@ -19,6 +19,9 @@ export const ThemeProvider = ({ children }: PropsWithChildren) => {
         theme={getThemeConfig(mode)}
         button={{ className: 'shadow-none' }}
         card={{ classNames: { body: 'p-4 md:p-6' } }}
+        segmented={{
+          className: 'border border-(--ant-color-border) bg-(--ant-color-bg-container) p-px!',
+        }}
       >
         <AntApp>{children}</AntApp>
       </ConfigProvider>

@@ -1,8 +1,6 @@
 import { createPdf, createXlsx, type DocumentContent } from '../../common/utils/documents.js'
+import { formatDate } from '../../common/utils/format.js'
 import type { Report } from './reports.mock.js'
-
-const formatDate = (value: string) =>
-  new Date(value).toLocaleDateString('ru-RU', { timeZone: 'Asia/Tashkent' })
 
 const toContent = (report: Report): DocumentContent => ({
   title: report.title,

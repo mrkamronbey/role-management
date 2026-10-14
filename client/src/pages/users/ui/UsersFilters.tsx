@@ -1,12 +1,9 @@
 import { Select } from 'antd'
-import { ROLES, ROLE_LABELS, type RoleName } from '@/shared/config'
-import { useOptions } from '@/shared/lib/hooks'
+import { ROLE_LABELS, type RoleName } from '@/shared/config'
+import { toOptions } from '@/shared/lib/options'
 import { SearchInput } from '@/shared/ui'
 
-const ALL_ROLES = Object.values(ROLES)
-
-const getRole = (role: RoleName) => role
-const getRoleLabel = (role: RoleName) => ROLE_LABELS[role]
+const roleOptions = toOptions(ROLE_LABELS)
 
 interface UsersFiltersProps {
   search: string
@@ -15,24 +12,20 @@ interface UsersFiltersProps {
   onRoleChange: (value?: RoleName) => void
 }
 
-export const UsersFilters = ({ search, role, onSearch, onRoleChange }: UsersFiltersProps) => {
-  const roleOptions = useOptions(ALL_ROLES, getRole, getRoleLabel)
-
-  return (
-    <>
-      <SearchInput
-        value={search}
-        placeholder="Ism yoki email bo'yicha qidirish"
-        onSearch={onSearch}
-      />
-      <Select
-        allowClear
-        placeholder="Rol bo'yicha"
-        options={roleOptions}
-        value={role}
-        onChange={onRoleChange}
-        className="w-44"
-      />
-    </>
-  )
-}
+export const UsersFilters = ({ search, role, onSearch, onRoleChange }: UsersFiltersProps) => (
+  <>
+    <SearchInput
+      value={search}
+      placeholder="Ism yoki email bo'yicha qidirish"
+      onSearch={onSearch}
+    />
+    <Select
+      allowClear
+      placeholder="Rol bo'yicha"
+      options={roleOptions}
+      value={role}
+      onChange={onRoleChange}
+      className="w-44"
+    />
+  </>
+)

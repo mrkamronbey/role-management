@@ -1,5 +1,5 @@
 import { MenuFoldOutlined, MenuOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
-import { Button, Layout, Typography, theme } from 'antd'
+import { Button, Layout, Typography } from 'antd'
 import { useMatches } from 'react-router'
 import { ThemeToggle } from '@/features/theme-toggle'
 import type { RouteHandle } from '@/shared/config'
@@ -12,7 +12,6 @@ interface AppHeaderProps {
 }
 
 export const AppHeader = ({ isMobile, collapsed, onMenuClick }: AppHeaderProps) => {
-  const { token } = theme.useToken()
   const matches = useMatches()
   const title = (matches[matches.length - 1]?.handle as RouteHandle | undefined)?.title
 
@@ -22,10 +21,7 @@ export const AppHeader = ({ isMobile, collapsed, onMenuClick }: AppHeaderProps) 
   }
 
   return (
-    <Layout.Header
-      className="flex items-center justify-between gap-3"
-      style={{ borderBottom: `1px solid ${token.colorBorderSecondary}` }}
-    >
+    <Layout.Header className="flex items-center justify-between gap-3 border-b border-(--ant-color-border-secondary)">
       <Button type="text" aria-label="Menyu" icon={menuIcon} onClick={onMenuClick} />
       <Typography.Title
         level={4}

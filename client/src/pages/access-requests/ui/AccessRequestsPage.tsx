@@ -1,25 +1,23 @@
-import { Button, Col, Flex, Result, Row, Segmented, Select, Skeleton, Typography } from 'antd'
+import { Col, Flex, Row, Segmented, Select, Skeleton, Typography } from 'antd'
 import { useAccessRequestsQuery, usePendingRequestsQuery } from '@/entities/access-request'
-import { getErrorMessage } from '@/shared/api'
 import { ROLES, ROLE_LABELS } from '@/shared/config'
 import { useIsMobile } from '@/shared/lib/hooks'
 import {
+  DateRangeFilter,
   EmptyState,
+  ErrorResult,
   PageCard,
   PaginationFooter,
   RefreshButton,
   SearchInput,
   ViewSwitcher,
-  DateRangeFilter,
 } from '@/shared/ui'
+import { toOptions } from '@/shared/lib/options'
 import { useAccessRequestsFilters, type Tab } from '../model/useAccessRequestsFilters'
 import { AccessRequestCard } from './AccessRequestCard'
 import { AccessRequestRow } from './AccessRequestRow'
 
-const roleOptions = [ROLES.PAYMENT, ROLES.REPORTS].map((role) => ({
-  value: role,
-  label: ROLE_LABELS[role],
-}))
+const roleOptions = toOptions(ROLE_LABELS).filter((option) => option.value !== ROLES.ADMIN)
 
 export const AccessRequestsPage = () => {
   const filters = useAccessRequestsFilters()
@@ -40,14 +38,7 @@ export const AccessRequestsPage = () => {
   if (isPending) {
     content = <Skeleton active paragraph={{ rows: 4 }} />
   } else if (isError) {
-    content = (
-      <Result
-        status="error"
-        title="So'rovlarni yuklab bo'lmadi"
-        subTitle={getErrorMessage(error)}
-        extra={<Button onClick={() => refetch()}>Qayta urinish</Button>}
-      />
-    )
+    content = <ErrorResult title="So'rovlarni yuklab bo'lmadi" error={error} onRetry={refetch} />
   } else if (data.items.length === 0) {
     content = (
       <EmptyState
@@ -125,7 +116,6 @@ export const AccessRequestsPage = () => {
               { value: 'pending', label: `Kutilmoqda · ${pendingQuery.data?.total ?? 0}` },
               { value: 'reviewed', label: "Ko'rib chiqilgan" },
             ]}
-            className="border border-(--ant-color-border) bg-(--ant-color-bg-container) p-px!"
           />
           <Typography.Text type="secondary">
             Xodim yopiq bo'limga kirmoqchi bo'lsa, so'rov shu yerga keladi. Tasdiqlansa, rol darhol

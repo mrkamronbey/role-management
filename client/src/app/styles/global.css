@@ -23,3 +23,15 @@ input:-webkit-autofill:focus {
   caret-color: var(--ant-color-text);
   transition: background-color 9999s ease-in-out 0s;
 }
+
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.4s;
+  animation-timing-function: ease-in-out;
+}

@@ -1,4 +1,5 @@
 import ExcelJS from 'exceljs'
+import { formatDateTime } from '../../common/utils/format.js'
 import type { createMockPayments } from './payments.mock.js'
 
 export type Payment = ReturnType<typeof createMockPayments>[number]
@@ -10,9 +11,6 @@ export const STATUS_LABELS: Record<Payment['status'], string> = {
   PENDING: 'Kutilmoqda',
   FAILED: 'Rad etilgan',
 }
-
-export const formatDate = (value: string) =>
-  new Date(value).toLocaleString('ru-RU', { timeZone: 'Asia/Tashkent' })
 
 const COLUMNS: { header: string; width: number; value: (payment: Payment) => string | number }[] = [
   { header: 'Chek', width: 14, value: (payment) => payment.receiptNumber },
@@ -27,7 +25,7 @@ const COLUMNS: { header: string; width: number; value: (payment: Payment) => str
   { header: 'Valyuta', width: 10, value: (payment) => payment.currency },
   { header: "To'lov usuli", width: 18, value: (payment) => payment.method },
   { header: 'Holat', width: 16, value: (payment) => STATUS_LABELS[payment.status] },
-  { header: 'Sana', width: 22, value: (payment) => formatDate(payment.createdAt) },
+  { header: 'Sana', width: 22, value: (payment) => formatDateTime(payment.createdAt) },
 ]
 
 const escapeCsv = (value: string | number) => {

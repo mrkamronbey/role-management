@@ -76,7 +76,7 @@ Import faqat yuqoridan pastga yo'naladi: `app → pages → widgets → features
 - **Ism va familiya:** faqat harflar va o'zbekcha apostroflar (O'tkir, Gʻayrat), 2–50 belgi.
 - **ADMIN roli:** formada tanlab bo'lmaydi va olib tashlab bo'lmaydi. Administrator va joriy foydalanuvchini o'chirib bo'lmaydi.
 - **ADMIN** superuser: barcha sahifalarni qo'shimcha rolsiz ko'radi.
-- **Sessiya:** `localStorage` da faqat token saqlanadi. Sahifa yangilanganda foydalanuvchi va rollar `/auth/me` dan qayta olinadi. 401 javobida sessiya tozalanadi.
+- **Sessiya:** token cookie'da saqlanadi (`js-cookie`, 1 kun, `sameSite: 'strict'`). Sahifa yangilanganda foydalanuvchi va rollar `/auth/me` dan qayta olinadi. 401 javobida sessiya tozalanadi.
 - **Frontend'dagi himoya** (`PrivateRoutes`, `PrivateComponent`) faqat interfeys uchun. Haqiqiy tekshiruv backend'dagi Guard'larda.
 
 ## Rasmlar

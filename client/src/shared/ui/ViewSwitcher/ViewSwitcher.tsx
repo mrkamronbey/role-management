@@ -23,7 +23,6 @@ export const ViewSwitcher = ({ value, onChange }: ViewSwitcherProps) => {
         { value: 'grid', icon: <AppstoreOutlined />, title: 'Kartalar' },
         { value: 'list', icon: <UnorderedListOutlined />, title: "Ro'yxat" },
       ]}
-      className="border border-(--ant-color-border) bg-(--ant-color-bg-container) p-px!"
     />
   )
 }

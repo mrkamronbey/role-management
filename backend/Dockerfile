@@ -20,4 +20,4 @@ COPY package.json prisma.config.ts ./
 COPY prisma ./prisma
 
 EXPOSE 3000
-CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && npm run start:prod"]
+CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && exec node dist/main"]

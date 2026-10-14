@@ -1,5 +1,6 @@
 import { createPdf } from '../../common/utils/documents.js'
-import { STATUS_LABELS, formatDate, type Payment } from './payments.export.js'
+import { formatDateTime } from '../../common/utils/format.js'
+import { STATUS_LABELS, type Payment } from './payments.export.js'
 
 const formatMoney = (amount: number, currency: string) =>
   `${amount.toLocaleString('ru-RU').replace(/\s/g, ' ')} ${currency}`
@@ -7,7 +8,7 @@ const formatMoney = (amount: number, currency: string) =>
 export const buildReceiptPdf = (payment: Payment) =>
   createPdf({
     title: "To'lov cheki",
-    subtitle: `${payment.receiptNumber} | ${formatDate(payment.createdAt)}`,
+    subtitle: `${payment.receiptNumber} | ${formatDateTime(payment.createdAt)}`,
     sections: [
       {
         title: "To'lov ma'lumotlari",
@@ -15,7 +16,7 @@ export const buildReceiptPdf = (payment: Payment) =>
           ['Chek raqami', payment.receiptNumber],
           ['Tranzaksiya ID', payment.transactionId],
           ['Holat', STATUS_LABELS[payment.status]],
-          ['Sana', formatDate(payment.createdAt)],
+          ['Sana', formatDateTime(payment.createdAt)],
           ["To'lov usuli", payment.method],
           ["To'lov maqsadi", payment.purpose],
         ],

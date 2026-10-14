@@ -8,6 +8,7 @@ import { toDateFilter } from '../../common/utils/date-filter.js'
 import type { Prisma } from '../../generated/prisma/client.js'
 import { AccessRequestStatus } from '../../generated/prisma/enums.js'
 import { PrismaService } from '../../prisma/prisma.service.js'
+import { userSearchWhere } from '../users/user-search.js'
 import type { User } from '../users/users.select.js'
 import { accessRequestSelect, toAccessRequest } from './access-requests.select.js'
 import type { AccessRequestsQueryDto } from './dto/access-requests-query.dto.js'
@@ -22,15 +23,7 @@ export class AccessRequestsService {
       createdAt: toDateFilter({ from, to }),
       ...(status === 'pending' && { status: AccessRequestStatus.PENDING }),
       ...(status === 'reviewed' && { status: { not: AccessRequestStatus.PENDING } }),
-      ...(search && {
-        user: {
-          OR: [
-            { firstName: { contains: search, mode: 'insensitive' } },
-            { lastName: { contains: search, mode: 'insensitive' } },
-            { email: { contains: search, mode: 'insensitive' } },
-          ],
-        },
-      }),
+      ...(search && { user: userSearchWhere(search) }),
       ...(role && { role: { name: role } }),
     }
 

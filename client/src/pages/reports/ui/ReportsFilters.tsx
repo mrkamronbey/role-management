@@ -6,14 +6,12 @@ import {
   type ReportStatus,
   type ReportType,
 } from '@/entities/report'
+import { toOptions } from '@/shared/lib/options'
 import { SearchInput } from '@/shared/ui'
 
-const typeOptions = Object.entries(REPORT_TYPE_LABELS).map(([value, label]) => ({ value, label }))
+const typeOptions = toOptions(REPORT_TYPE_LABELS)
 
-const statusOptions = Object.entries(REPORT_STATUS_META).map(([value, meta]) => ({
-  value,
-  label: meta.label,
-}))
+const statusOptions = toOptions(REPORT_STATUS_META)
 
 interface ReportsFiltersProps {
   search: string

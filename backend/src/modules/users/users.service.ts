@@ -14,6 +14,7 @@ import { PrismaService } from '../../prisma/prisma.service.js'
 import type { CreateUserDto } from './dto/create-user.dto.js'
 import type { UpdateUserDto } from './dto/update-user.dto.js'
 import type { UsersQueryDto } from './dto/users-query.dto.js'
+import { userSearchWhere } from './user-search.js'
 import { toUser, userSelect, type User } from './users.select.js'
 
 const EMAIL_TAKEN = 'Bunday email bilan foydalanuvchi allaqachon mavjud'
@@ -37,13 +38,7 @@ export class UsersService {
   async findMany({ search, role, from, to, page, limit }: UsersQueryDto) {
     const where: Prisma.UserWhereInput = {
       createdAt: toDateFilter({ from, to }),
-      ...(search && {
-        OR: [
-          { firstName: { contains: search, mode: 'insensitive' } },
-          { lastName: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
-        ],
-      }),
+      ...(search && userSearchWhere(search)),
       ...(role && { roles: { some: { role: { name: role } } } }),
     }
 

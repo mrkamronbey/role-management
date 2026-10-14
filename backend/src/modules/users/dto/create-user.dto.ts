@@ -1,16 +1,14 @@
 import { Transform } from 'class-transformer'
-import { IsArray, IsEmail, IsIn, IsNotEmpty, Length, Matches, MinLength } from 'class-validator'
+import { IsArray, IsIn, IsNotEmpty, Length, Matches, MinLength } from 'class-validator'
 import { ASSIGNABLE_ROLES } from '../../../common/constants/roles.js'
+import { EmailField } from '../../../common/decorators/email-field.decorator.js'
 import {
   NAME_REGEX,
   SPECIAL_CHAR_REGEX,
   UPPERCASE_REGEX,
 } from '../../../common/validation/patterns.js'
+import { trim } from '../../../common/validation/transforms.js'
 import type { RoleName } from '../../../generated/prisma/enums.js'
-
-const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value)
-const toLowerCase = ({ value }: { value: unknown }) =>
-  typeof value === 'string' ? value.trim().toLowerCase() : value
 
 export class CreateUserDto {
   @Transform(trim)
@@ -25,9 +23,7 @@ export class CreateUserDto {
   @IsNotEmpty({ message: 'Familiya kiritilishi shart' })
   lastName: string
 
-  @Transform(toLowerCase)
-  @IsEmail({}, { message: "Email noto'g'ri formatda (masalan: example@gmail.com)" })
-  @IsNotEmpty({ message: 'Email kiritilishi shart' })
+  @EmailField()
   email: string
 
   @Matches(SPECIAL_CHAR_REGEX, { message: "Parolda kamida 1 ta maxsus belgi bo'lishi kerak" })

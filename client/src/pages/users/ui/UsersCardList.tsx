@@ -1,7 +1,8 @@
-import { Card, Empty, Spin, Typography } from 'antd'
+import { Card, Spin, Typography } from 'antd'
 import { UserAvatar, getFullName, type User } from '@/entities/user'
 import { UserRolesEditor } from '@/features/user-form'
 import { formatDate } from '@/shared/lib/format'
+import { EmptyState } from '@/shared/ui'
 import { UserRowActions } from './UserRowActions'
 
 interface UsersCardListProps {
@@ -12,7 +13,7 @@ interface UsersCardListProps {
 
 export const UsersCardList = ({ users, loading, onEdit }: UsersCardListProps) => {
   if (!loading && users.length === 0) {
-    return <Empty className="py-10" description="Foydalanuvchilar topilmadi" />
+    return <EmptyState description="Foydalanuvchilar topilmadi" />
   }
 
   return (

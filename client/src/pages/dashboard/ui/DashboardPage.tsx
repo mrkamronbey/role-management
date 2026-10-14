@@ -9,7 +9,7 @@ import { getFullName } from '@/entities/user'
 import { getErrorMessage } from '@/shared/api'
 import { BRAND_COLORS, ROUTES } from '@/shared/config'
 import { formatCompactMoney, formatMoney, formatRelative } from '@/shared/lib/format'
-import { DateRangeFilter, PageCard } from '@/shared/ui'
+import { DateRangeFilter, PageCard, RefreshButton } from '@/shared/ui'
 import { useDashboardFilters } from '../model/useDashboardFilters'
 import { DashboardCharts } from './charts/DashboardCharts'
 import { RecentListCard } from './RecentListCard'
@@ -138,7 +138,15 @@ export const DashboardPage = () => {
   return (
     <PageCard
       title={`Xush kelibsiz, ${user ? getFullName(user) : ''}`}
-      extra={<DateRangeFilter from={from} to={to} onChange={setPeriod} />}
+      extra={
+        <>
+          <RefreshButton
+            loading={analyticsQuery.isFetching}
+            onClick={() => analyticsQuery.refetch()}
+          />
+          <DateRangeFilter from={from} to={to} onChange={setPeriod} />
+        </>
+      }
       filters={
         periodText && (
           <Typography.Text type="secondary">Ko'rsatilgan davr: {periodText}</Typography.Text>

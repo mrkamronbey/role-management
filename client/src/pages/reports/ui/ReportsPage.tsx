@@ -1,8 +1,7 @@
 import { useState } from 'react'
-import { Button, Result, Typography } from 'antd'
+import { Typography } from 'antd'
 import { useReportsQuery } from '@/entities/report'
-import { getErrorMessage } from '@/shared/api'
-import { PageCard, PaginationFooter, RefreshButton, ViewSwitcher } from '@/shared/ui'
+import { ErrorResult, PageCard, PaginationFooter, RefreshButton, ViewSwitcher } from '@/shared/ui'
 import { useReportsFilters } from '../model/useReportsFilters'
 import { ReportPreviewModal } from './ReportPreviewModal'
 import { ReportsFilters } from './ReportsFilters'
@@ -62,11 +61,10 @@ export const ReportsPage = () => {
       footer={footer}
     >
       {reportsQuery.isError ? (
-        <Result
-          status="error"
+        <ErrorResult
           title="Hisobotlarni yuklab bo'lmadi"
-          subTitle={getErrorMessage(reportsQuery.error)}
-          extra={<Button onClick={() => reportsQuery.refetch()}>Qayta urinish</Button>}
+          error={reportsQuery.error}
+          onRetry={reportsQuery.refetch}
         />
       ) : view === 'grid' ? (
         <ReportsGrid

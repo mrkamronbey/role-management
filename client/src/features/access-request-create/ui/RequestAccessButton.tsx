@@ -3,12 +3,11 @@ import { KeyOutlined } from '@ant-design/icons'
 import { Button, Form, Input, Modal, Select, Typography } from 'antd'
 import { useMyAccessRequestsQuery, type CreateAccessRequestDto } from '@/entities/access-request'
 import { useUserRoles } from '@/entities/session'
-import { ROLES, ROLE_LABELS, type RoleName } from '@/shared/config'
+import { ROLES, ROLE_LABELS } from '@/shared/config'
 import { applyServerErrors } from '@/shared/lib/form'
 import { useNotify } from '@/shared/lib/hooks'
+import { toOptions } from '@/shared/lib/options'
 import { useCreateAccessRequest } from '../api/useCreateAccessRequest'
-
-const REQUESTABLE_ROLES: RoleName[] = [ROLES.PAYMENT, ROLES.REPORTS]
 
 export const RequestAccessButton = () => {
   const [open, setOpen] = useState(false)
@@ -17,12 +16,12 @@ export const RequestAccessButton = () => {
   const pendingRoles = myRequests
     .filter((request) => request.status === 'PENDING')
     .map((request) => request.role)
-  const roleOptions = REQUESTABLE_ROLES.filter(
-    (role) => !userRoles.includes(role) && !pendingRoles.includes(role),
-  ).map((role) => ({
-    value: role,
-    label: ROLE_LABELS[role],
-  }))
+  const roleOptions = toOptions(ROLE_LABELS).filter(
+    (option) =>
+      option.value !== ROLES.ADMIN &&
+      !userRoles.includes(option.value) &&
+      !pendingRoles.includes(option.value),
+  )
   const [form] = Form.useForm<CreateAccessRequestDto>()
   const notify = useNotify()
   const createRequest = useCreateAccessRequest()

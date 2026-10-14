@@ -1,10 +1,8 @@
-import { Transform } from 'class-transformer'
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator'
+import { IsNotEmpty, IsString } from 'class-validator'
+import { EmailField } from '../../../common/decorators/email-field.decorator.js'
 
 export class LoginDto {
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
-  @IsEmail({}, { message: "Email noto'g'ri formatda (masalan: example@gmail.com)" })
-  @IsNotEmpty({ message: 'Email kiritilishi shart' })
+  @EmailField()
   email: string
 
   @IsString({ message: "Parol matn bo'lishi kerak" })

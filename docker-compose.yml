@@ -12,6 +12,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    restart: unless-stopped
 
   backend:
     build: ./backend
@@ -26,6 +27,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
 
   client:
     build:
@@ -36,6 +38,7 @@ services:
       - '8080:80'
     depends_on:
       - backend
+    restart: unless-stopped
 
 volumes:
   db-data:

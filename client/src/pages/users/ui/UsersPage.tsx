@@ -1,13 +1,19 @@
 import { useState } from 'react'
 import { PlusOutlined } from '@ant-design/icons'
-import { Button, Result, Skeleton } from 'antd'
+import { Button, Skeleton } from 'antd'
 import { PrivateComponent } from '@/entities/session'
 import { useUsersQuery, type User } from '@/entities/user'
 import { UserFormModal } from '@/features/user-form'
-import { getErrorMessage } from '@/shared/api'
 import { ROLES } from '@/shared/config'
 import { useIsMobile } from '@/shared/lib/hooks'
-import { DataTable, DateRangeFilter, PageCard, PaginationFooter, RefreshButton } from '@/shared/ui'
+import {
+  DataTable,
+  DateRangeFilter,
+  ErrorResult,
+  PageCard,
+  PaginationFooter,
+  RefreshButton,
+} from '@/shared/ui'
 import { useUsersFilters } from '../model/useUsersFilters'
 import { UsersCardList } from './UsersCardList'
 import { getUsersColumns } from './usersColumns'
@@ -35,14 +41,7 @@ export const UsersPage = () => {
   if (isPending) {
     content = <Skeleton active paragraph={{ rows: 6 }} />
   } else if (isError) {
-    content = (
-      <Result
-        status="error"
-        title="Ro'yxatni yuklab bo'lmadi"
-        subTitle={getErrorMessage(error)}
-        extra={<Button onClick={() => refetch()}>Qayta urinish</Button>}
-      />
-    )
+    content = <ErrorResult title="Ro'yxatni yuklab bo'lmadi" error={error} onRetry={refetch} />
   } else if (isMobile) {
     content = <UsersCardList users={data.items} loading={isFetching} onEdit={openEdit} />
   } else {
