@@ -213,7 +213,7 @@ Barcha manzillar `/api` bilan boshlanadi. Himoyalangan so'rovlarda header: `Auth
 |---|---|---|---|
 | POST | `/auth/login` | Hamma | Login, `{ accessToken, user }` qaytaradi |
 | GET | `/auth/me` | Login qilgan | Joriy foydalanuvchi va uning rollari |
-| GET | `/users?search=&role=&page=&limit=` | ADMIN | Ro'yxat: qidiruv, rol filtri, pagination |
+| GET | `/users?search=&role=&from=&to=&page=&limit=` | ADMIN | Ro'yxat: qidiruv, rol filtri, ro'yxatdan o'tgan sana bo'yicha filtr, pagination |
 | GET | `/users/:id` | ADMIN | Bitta foydalanuvchi |
 | POST | `/users` | ADMIN | Yaratish |
 | PATCH | `/users/:id` | ADMIN | Tahrirlash (parol bo'sh bo'lsa o'zgarmaydi) |
@@ -221,8 +221,13 @@ Barcha manzillar `/api` bilan boshlanadi. Himoyalangan so'rovlarda header: `Auth
 | GET | `/roles` | ADMIN | Rollar ro'yxati |
 | GET | `/payments?from=&to=&status=&search=&page=&limit=` | PAYMENT | Mock to'lovlar: sana oralig'i, holat, qidiruv |
 | GET | `/payments/summary?from=&to=` | PAYMENT | Davr bo'yicha statistika: jami summa, holatlar soni |
-| GET | `/reports?status=&search=&page=&limit=` | REPORTS | Mock hisobotlar |
-| GET | `/access-requests?status=pending\|reviewed&page=&limit=` | ADMIN | Rol so'rovlari |
+| GET | `/payments/export?format=csv\|xlsx&status=&from=&to=&search=` | PAYMENT | Filtrlangan hamma to'lovlarni CSV yoki Excel fayl qilib yuklab olish |
+| GET | `/payments/:id/receipt` | PAYMENT | Bitta to'lov chekini PDF qilib yuklab olish |
+| GET | `/reports?status=&type=&period=YYYY-MM&search=&page=&limit=` | REPORTS | Mock hisobotlar (holat, tur, oy, nomi bo'yicha qidiruv) |
+| GET | `/reports/:id/download` | REPORTS | Tayyor hisobotni o'z formatida (PDF yoki XLSX) yuklab olish |
+| GET | `/access-requests?status=pending\|reviewed&search=&role=&from=&to=&page=&limit=` | ADMIN | Rol so'rovlari (xodim ismi/email bo'yicha qidiruv, rol va yuborilgan sana bo'yicha filtr) |
+| GET | `/analytics?from=YYYY-MM-DD&to=YYYY-MM-DD` | ADMIN | Bosh sahifa uchun hamma ma'lumot (stat kartalar, chart'lar, oxirgi ro'yxatlar) tanlangan davr bo'yicha. Davr berilmasa, oxirgi 30 kun |
+| GET | `/access-requests/my` | Login qilgan | O'z so'rovlari va ularning holati |
 | POST | `/access-requests` | Login qilgan | Rol so'rash |
 | PATCH | `/access-requests/:id/approve` | ADMIN | Tasdiqlash (rol biriktiriladi) |
 | PATCH | `/access-requests/:id/reject` | ADMIN | Rad etish |
