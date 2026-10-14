@@ -1,21 +1,10 @@
 import { IntersectionType } from '@nestjs/mapped-types'
-import { IsDateString, IsIn, IsOptional, IsString } from 'class-validator'
+import { IsIn, IsOptional, IsString } from 'class-validator'
+import { DateRangeQueryDto } from '../../common/dto/date-range-query.dto.js'
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto.js'
 import type { PaymentStatus } from './payments.mock.js'
 
-const DATE_MESSAGE = "Sana YYYY-MM-DD formatida bo'lishi kerak"
-
-export class PaymentsPeriodDto {
-  @IsOptional()
-  @IsDateString({ strict: true }, { message: DATE_MESSAGE })
-  from?: string
-
-  @IsOptional()
-  @IsDateString({ strict: true }, { message: DATE_MESSAGE })
-  to?: string
-}
-
-export class PaymentsQueryDto extends IntersectionType(PaginationQueryDto, PaymentsPeriodDto) {
+export class PaymentsFilterDto extends DateRangeQueryDto {
   @IsOptional()
   @IsIn(['SUCCESS', 'PENDING', 'FAILED'], { message: "Holat noto'g'ri" })
   status?: PaymentStatus
@@ -23,4 +12,11 @@ export class PaymentsQueryDto extends IntersectionType(PaginationQueryDto, Payme
   @IsOptional()
   @IsString({ message: "Qidiruv matn bo'lishi kerak" })
   search?: string
+}
+
+export class PaymentsQueryDto extends IntersectionType(PaginationQueryDto, PaymentsFilterDto) {}
+
+export class PaymentsExportQueryDto extends PaymentsFilterDto {
+  @IsIn(['csv', 'xlsx'], { message: "Format noto'g'ri" })
+  format: 'csv' | 'xlsx' = 'csv'
 }

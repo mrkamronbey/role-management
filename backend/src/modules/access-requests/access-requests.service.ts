@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common'
+import { toDateFilter } from '../../common/utils/date-filter.js'
 import type { Prisma } from '../../generated/prisma/client.js'
 import { AccessRequestStatus } from '../../generated/prisma/enums.js'
 import { PrismaService } from '../../prisma/prisma.service.js'
@@ -16,10 +17,21 @@ import type { CreateAccessRequestDto } from './dto/create-access-request.dto.js'
 export class AccessRequestsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findMany({ status, page, limit }: AccessRequestsQueryDto) {
+  async findMany({ status, search, role, from, to, page, limit }: AccessRequestsQueryDto) {
     const where: Prisma.AccessRequestWhereInput = {
+      createdAt: toDateFilter({ from, to }),
       ...(status === 'pending' && { status: AccessRequestStatus.PENDING }),
       ...(status === 'reviewed' && { status: { not: AccessRequestStatus.PENDING } }),
+      ...(search && {
+        user: {
+          OR: [
+            { firstName: { contains: search, mode: 'insensitive' } },
+            { lastName: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+          ],
+        },
+      }),
+      ...(role && { role: { name: role } }),
     }
 
     const [requests, total] = await this.prisma.$transaction([
@@ -34,6 +46,15 @@ export class AccessRequestsService {
     ])
 
     return { items: requests.map(toAccessRequest), total, page, limit }
+  }
+
+  async findMine(userId: number) {
+    const requests = await this.prisma.accessRequest.findMany({
+      where: { userId },
+      select: accessRequestSelect,
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    })
+    return requests.map(toAccessRequest)
   }
 
   async create(user: User, { role, reason }: CreateAccessRequestDto) {

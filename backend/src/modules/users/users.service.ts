@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common'
 import bcrypt from 'bcryptjs'
+import { toDateFilter } from '../../common/utils/date-filter.js'
 import type { Prisma } from '../../generated/prisma/client.js'
 import { RoleName } from '../../generated/prisma/enums.js'
 import { isUniqueViolation } from '../../prisma/is-unique-violation.js'
@@ -33,8 +34,9 @@ const throwIfEmailTaken = (error: unknown): never => {
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findMany({ search, role, page, limit }: UsersQueryDto) {
+  async findMany({ search, role, from, to, page, limit }: UsersQueryDto) {
     const where: Prisma.UserWhereInput = {
+      createdAt: toDateFilter({ from, to }),
       ...(search && {
         OR: [
           { firstName: { contains: search, mode: 'insensitive' } },

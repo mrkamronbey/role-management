@@ -2,7 +2,7 @@ const DAY = 24 * 60 * 60 * 1000
 const PAYMENTS_COUNT = 120
 
 const payers = ['Aloqabank', 'Ipoteka bank', 'Kapitalbank', 'Hamkorbank', 'Agrobank', 'Xalq banki']
-const methods = ["Bank o'tkazmasi", 'Humo', 'Uzcard', 'SWIFT']
+const methods = ["Bank o'tkazmasi", 'Humo', 'Uzcard', 'Click']
 const statuses = ['SUCCESS', 'SUCCESS', 'SUCCESS', 'PENDING', 'FAILED'] as const
 
 const recipients = [

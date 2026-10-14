@@ -7,6 +7,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor.
 import { validationPipe } from './common/pipes/validation.pipe.js'
 import { validateEnv } from './config/env.validation.js'
 import { AccessRequestsModule } from './modules/access-requests/access-requests.module.js'
+import { AnalyticsModule } from './modules/analytics/analytics.module.js'
 import { AuthModule } from './modules/auth/auth.module.js'
 import { PaymentsModule } from './modules/payments/payments.module.js'
 import { ReportsModule } from './modules/reports/reports.module.js'
@@ -24,6 +25,7 @@ import { PrismaModule } from './prisma/prisma.module.js'
     PaymentsModule,
     ReportsModule,
     AccessRequestsModule,
+    AnalyticsModule,
   ],
   providers: [
     { provide: APP_PIPE, useValue: validationPipe },

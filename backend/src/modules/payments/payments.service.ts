@@ -1,16 +1,21 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, NotFoundException } from '@nestjs/common'
+import type { DateRangeQueryDto } from '../../common/dto/date-range-query.dto.js'
 import { paginate } from '../../common/utils/paginate.js'
-import type { PaymentsPeriodDto, PaymentsQueryDto } from './payments-query.dto.js'
+import type { PaymentsFilterDto, PaymentsQueryDto } from './payments-query.dto.js'
 import { createMockPayments } from './payments.mock.js'
 
 @Injectable()
 export class PaymentsService {
   private readonly payments = createMockPayments()
 
-  findMany({ status, search, ...query }: PaymentsQueryDto) {
+  findMany({ page, limit, ...filter }: PaymentsQueryDto) {
+    return paginate(this.findFiltered(filter), { page, limit })
+  }
+
+  findFiltered({ status, search, ...period }: PaymentsFilterDto) {
     const text = search?.trim().toLowerCase()
 
-    const payments = this.findInPeriod(query).filter(
+    return this.findInPeriod(period).filter(
       (payment) =>
         (!status || payment.status === status) &&
         (!text ||
@@ -18,11 +23,9 @@ export class PaymentsService {
           payment.recipient.toLowerCase().includes(text) ||
           payment.receiptNumber.toLowerCase().includes(text)),
     )
-
-    return paginate(payments, query)
   }
 
-  getSummary(period: PaymentsPeriodDto) {
+  getSummary(period: DateRangeQueryDto) {
     const payments = this.findInPeriod(period)
     const countByStatus = (status: string) =>
       payments.filter((payment) => payment.status === status).length
@@ -37,7 +40,13 @@ export class PaymentsService {
     }
   }
 
-  private findInPeriod({ from, to }: PaymentsPeriodDto) {
+  findById(id: number) {
+    const payment = this.payments.find((item) => item.id === id)
+    if (!payment) throw new NotFoundException("To'lov topilmadi")
+    return payment
+  }
+
+  findInPeriod({ from, to }: DateRangeQueryDto) {
     return this.payments.filter((payment) => {
       const date = payment.createdAt.slice(0, 10)
       return (!from || date >= from) && (!to || date <= to)

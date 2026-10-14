@@ -19,6 +19,11 @@ export class AccessRequestsController {
     return this.accessRequestsService.findMany(query)
   }
 
+  @Get('my')
+  findMine(@CurrentUser() user: User) {
+    return this.accessRequestsService.findMine(user.id)
+  }
+
   @ResponseMessage("So'rov yuborildi")
   @Post()
   create(@CurrentUser() user: User, @Body() dto: CreateAccessRequestDto) {
