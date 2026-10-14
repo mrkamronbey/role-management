@@ -35,7 +35,7 @@ export const PageCard = ({ title, extra, filters, footer, children }: PageCardPr
           )
         }
         actions={footer ? [footer] : undefined}
-        className="flex h-full flex-col [&_.ant-card-extra]:ms-0 [&_.ant-card-extra]:flex-auto [&_.ant-card-head-wrapper]:flex-wrap [&_.ant-card-head-wrapper]:gap-3"
+        className="flex h-full flex-col [&>.ant-card-head_.ant-card-extra]:ms-0 [&>.ant-card-head_.ant-card-extra]:flex-auto [&>.ant-card-head_.ant-card-head-wrapper]:flex-wrap [&>.ant-card-head_.ant-card-head-wrapper]:gap-3"
         styles={{
           header: {
             borderBottom: 'none',
