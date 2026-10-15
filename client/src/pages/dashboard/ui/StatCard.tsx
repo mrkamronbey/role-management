@@ -14,8 +14,8 @@ export const StatCard = ({ title, value, icon, color, path }: StatCardProps) => 
   const navigate = useNavigate()
 
   return (
-    <Card onClick={() => navigate(path)} className="h-full cursor-pointer">
-      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4">
+    <Card onClick={() => navigate(path)} className="@container h-full cursor-pointer">
+      <div className="flex flex-col items-start gap-3 @[15rem]:flex-row @[15rem]:items-center @[15rem]:gap-4">
         <div
           className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-xl"
           style={{ color, backgroundColor: `${color}1A` }}
